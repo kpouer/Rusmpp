@@ -96,7 +96,7 @@ pub trait Decode: Sized {
 /// let expected = Foo {
 ///     a: 0x01,
 ///     b: 0x0203,
-///     c: AnyOctetString::new([0x04, 0x05, 0x06, 0x07, 0x08]),
+///     c: AnyOctetString::new(vec![0x04, 0x05, 0x06, 0x07, 0x08]),
 /// };
 ///
 /// let (foo, size) = Foo::decode(buf, length).unwrap();
@@ -198,7 +198,7 @@ impl<T: Decode> DecodeWithLength for T {
 /// let (foo, size) = Foo::decode(key, &buf[index..], length - index).unwrap();
 /// let index = index + size;
 ///
-/// let expected = Foo::B(AnyOctetString::new([0x05, 0x06, 0x07, 0x08]));
+/// let expected = Foo::B(AnyOctetString::new(vec![0x05, 0x06, 0x07, 0x08]));
 ///
 /// assert_eq!(size, 4);
 /// assert_eq!(foo, expected);
@@ -352,7 +352,7 @@ pub trait DecodeWithKey: Sized {
 ///     .unwrap();
 /// let index = index + size;
 ///
-/// let expected = Foo::C(AnyOctetString::new([0x05, 0x06, 0x07, 0x08]));
+/// let expected = Foo::C(AnyOctetString::new(vec![0x05, 0x06, 0x07, 0x08]));
 ///
 /// assert_eq!(size, 4);
 /// assert_eq!(foo, expected);
