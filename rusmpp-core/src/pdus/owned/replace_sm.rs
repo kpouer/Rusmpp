@@ -269,9 +269,11 @@ mod tests {
                     .source_addr_npi(Npi::Isdn)
                     .source_addr(COctetString::from_str("Source Addr").unwrap())
                     .schedule_delivery_time(
-                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap(),
+                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0".to_vec()).unwrap(),
                     )
-                    .validity_period(EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap())
+                    .validity_period(
+                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0".to_vec()).unwrap()
+                    )
                     .registered_delivery(RegisteredDelivery::default())
                     .sm_default_msg_id(0)
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
@@ -282,9 +284,11 @@ mod tests {
                     .source_addr_npi(Npi::Isdn)
                     .source_addr(COctetString::from_str("Source Addr").unwrap())
                     .schedule_delivery_time(
-                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap(),
+                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0".to_vec()).unwrap(),
                     )
-                    .validity_period(EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap())
+                    .validity_period(
+                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0".to_vec()).unwrap()
+                    )
                     .registered_delivery(RegisteredDelivery::default())
                     .sm_default_msg_id(0)
                     .message_payload(Some(MessagePayload::new(AnyOctetString::new(
@@ -292,7 +296,9 @@ mod tests {
                     ))))
                     .build(),
                 Self::builder()
-                    .validity_period(EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap())
+                    .validity_period(
+                        EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0".to_vec()).unwrap()
+                    )
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .message_payload(Some(MessagePayload::new(AnyOctetString::new(
                         b"Message Payload".to_vec(),

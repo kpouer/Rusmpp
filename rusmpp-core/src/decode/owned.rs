@@ -589,8 +589,8 @@ mod tests {
         assert_eq!(
             values,
             alloc::vec![
-                EmptyOrFullCOctetString::<6>::new(b"Hello\0").unwrap(),
-                EmptyOrFullCOctetString::<6>::new(b"World\0").unwrap(),
+                EmptyOrFullCOctetString::<6>::new(b"Hello\0".to_vec()).unwrap(),
+                EmptyOrFullCOctetString::<6>::new(b"World\0".to_vec()).unwrap(),
             ]
         );
 
@@ -689,8 +689,8 @@ mod tests {
         assert_eq!(
             values,
             alloc::vec![
-                EmptyOrFullCOctetString::<6>::new(b"Hello\0").unwrap(),
-                EmptyOrFullCOctetString::<6>::new(b"World\0").unwrap(),
+                EmptyOrFullCOctetString::<6>::new(b"Hello\0".to_vec()).unwrap(),
+                EmptyOrFullCOctetString::<6>::new(b"World\0".to_vec()).unwrap(),
             ]
         );
 
