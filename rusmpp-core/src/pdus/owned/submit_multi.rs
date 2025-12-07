@@ -397,7 +397,7 @@ mod tests {
                 Self::builder()
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                        MessagePayload::new(AnyOctetString::new(b"Message Payload")),
+                        MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec())),
                     ))
                     .build(),
                 Self::builder()
@@ -413,7 +413,7 @@ mod tests {
                     ))
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                        MessagePayload::new(AnyOctetString::new(b"Message Payload")),
+                        MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec())),
                     ))
                     .push_tlv(MessageSubmissionRequestTlvValue::DestTelematicsId(16))
                     .build(),
@@ -455,7 +455,7 @@ mod tests {
     #[test]
     fn message_payload_suppresses_short_message() {
         let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
-        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload"));
+        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec()));
 
         // Using push_tlv
         let submit_sm = SubmitMulti::builder()

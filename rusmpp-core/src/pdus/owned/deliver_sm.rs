@@ -378,10 +378,10 @@ mod tests {
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .tlvs(alloc::vec![
                         MessageDeliveryRequestTlvValue::MessagePayload(MessagePayload::new(
-                            AnyOctetString::new(b"Message Payload"),
+                            AnyOctetString::new(b"Message Payload".to_vec()),
                         )),
                         MessageDeliveryRequestTlvValue::MessagePayload(MessagePayload::new(
-                            AnyOctetString::new(b"Message Payload 2"),
+                            AnyOctetString::new(b"Message Payload 2".to_vec()),
                         )),
                         MessageDeliveryRequestTlvValue::CallbackNumPresInd(
                             CallbackNumPresInd::new(
@@ -429,7 +429,7 @@ mod tests {
     #[test]
     fn message_payload_suppresses_short_message() {
         let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
-        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload"));
+        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec()));
 
         // Using push_tlv
         let deliver_sm = DeliverSm::builder()

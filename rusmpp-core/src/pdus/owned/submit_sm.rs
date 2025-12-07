@@ -451,7 +451,7 @@ mod tests {
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .tlvs(alloc::vec![
                         MessageSubmissionRequestTlvValue::MessagePayload(MessagePayload::new(
-                            AnyOctetString::new(b"Message Payload")
+                            AnyOctetString::new(b"Message Payload".to_vec())
                         ),)
                     ])
                     .build(),
@@ -459,7 +459,7 @@ mod tests {
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .tlvs(alloc::vec![
                         MessageSubmissionRequestTlvValue::MessagePayload(MessagePayload::new(
-                            AnyOctetString::new(b"Message Payload"),
+                            AnyOctetString::new(b"Message Payload".to_vec()),
                         )),
                         MessageSubmissionRequestTlvValue::UserResponseCode(3),
                         MessageSubmissionRequestTlvValue::DestBearerType(BearerType::FlexReFlex),
@@ -507,7 +507,7 @@ mod tests {
     #[test]
     fn message_payload_suppresses_short_message() {
         let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
-        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload"));
+        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec()));
 
         // Using push_tlv
         let submit_sm = SubmitSm::builder()

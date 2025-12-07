@@ -180,7 +180,10 @@ mod tests {
             let values: alloc::vec::Vec<u32> = alloc::vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             assert_eq!(values.length(), 40);
 
-            let values = alloc::vec![AnyOctetString::new(b"Hello"), AnyOctetString::new(b"World")];
+            let values = alloc::vec![
+                AnyOctetString::new(b"Hello".to_vec()),
+                AnyOctetString::new(b"World".to_vec())
+            ];
             assert_eq!(values.length(), 10);
 
             let values = alloc::vec![
@@ -259,7 +262,10 @@ mod tests {
                 ]
             );
 
-            let values = alloc::vec![AnyOctetString::new(b"Hello"), AnyOctetString::new(b"World")];
+            let values = alloc::vec![
+                AnyOctetString::new(b"Hello".to_vec()),
+                AnyOctetString::new(b"World".to_vec())
+            ];
             assert!(buf.len() >= values.length());
 
             let size = values.encode(buf);

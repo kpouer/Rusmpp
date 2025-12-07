@@ -288,14 +288,14 @@ mod tests {
                     .registered_delivery(RegisteredDelivery::default())
                     .sm_default_msg_id(0)
                     .message_payload(Some(MessagePayload::new(AnyOctetString::new(
-                        b"Message Payload",
+                        b"Message Payload".to_vec(),
                     ))))
                     .build(),
                 Self::builder()
                     .validity_period(EmptyOrFullCOctetString::new(b"2023-10-01T12:00\0").unwrap())
                     .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
                     .message_payload(Some(MessagePayload::new(AnyOctetString::new(
-                        b"Message Payload",
+                        b"Message Payload".to_vec(),
                     ))))
                     .build(),
             ]
@@ -336,7 +336,7 @@ mod tests {
     #[test]
     fn message_payload_suppresses_short_message() {
         let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
-        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload"));
+        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec()));
 
         // Using push_tlv
         let replace_sm = ReplaceSm::builder()
