@@ -157,8 +157,7 @@ impl<const MIN: usize, const MAX: usize> COctetString<MIN, MAX> {
 
     /// Create a new [`COctetString`] from a sequence of bytes without checking the length and null termination.
     #[inline]
-    #[doc(hidden)]
-    pub fn new_unchecked(bytes: impl AsRef<[u8]>) -> Self {
+    pub(crate) fn new_unchecked(bytes: impl AsRef<[u8]>) -> Self {
         Self::_ASSERT_VALID;
 
         let bytes = bytes.as_ref().to_vec();
