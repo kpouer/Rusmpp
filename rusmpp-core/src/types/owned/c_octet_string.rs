@@ -363,6 +363,8 @@ impl<const MIN: usize, const MAX: usize> Decode for COctetString<MIN, MAX> {
     }
 }
 
+// TODO: add TryFrom Traits
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -315,7 +315,7 @@ impl Client {
             .replace_if_present_flag(replace_if_present_flag.into())
             .data_coding(data_coding.into())
             .sm_default_msg_id(sm_default_msg_id)
-            .short_message(OctetString::new(short_message).map_value_err("short_message")?)
+            .short_message(OctetString::from_bytes(short_message).map_value_err("short_message")?)
             .tlvs(
                 tlvs.into_iter()
                     .map(MessageSubmissionRequestTlvValue::try_from)

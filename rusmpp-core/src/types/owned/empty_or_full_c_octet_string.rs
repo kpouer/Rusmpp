@@ -315,6 +315,8 @@ impl<const N: usize> Decode for EmptyOrFullCOctetString<N> {
     }
 }
 
+// TODO: add TryFrom Traits
+
 #[cfg(test)]
 mod tests {
     use super::*;

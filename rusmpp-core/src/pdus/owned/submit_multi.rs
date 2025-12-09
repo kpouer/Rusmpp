@@ -392,12 +392,12 @@ mod tests {
                     .replace_if_present_flag(ReplaceIfPresentFlag::default())
                     .data_coding(DataCoding::default())
                     .sm_default_msg_id(0)
-                    .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
+                    .short_message(OctetString::from_static_slice(b"Short Message").unwrap())
                     .build(),
                 Self::builder()
-                    .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
+                    .short_message(OctetString::from_static_slice(b"Short Message").unwrap())
                     .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                        MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec())),
+                        MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
                     ))
                     .build(),
                 Self::builder()
@@ -411,9 +411,9 @@ mod tests {
                             COctetString::from_static_slice(b"1234567890123456789\0").unwrap(),
                         ),
                     ))
-                    .short_message(OctetString::new(b"Short Message".to_vec()).unwrap())
+                    .short_message(OctetString::from_static_slice(b"Short Message").unwrap())
                     .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                        MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec())),
+                        MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
                     ))
                     .push_tlv(MessageSubmissionRequestTlvValue::DestTelematicsId(16))
                     .build(),
@@ -428,7 +428,7 @@ mod tests {
 
     #[test]
     fn short_message_length() {
-        let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
+        let short_message = OctetString::from_static_slice(b"Short Message").unwrap();
 
         let submit_sm = SubmitMulti::builder()
             .short_message(short_message.clone())
@@ -440,8 +440,8 @@ mod tests {
 
     #[test]
     fn short_message_override() {
-        let short_message_1 = OctetString::new(b"Short Message 101".to_vec()).unwrap();
-        let short_message_2 = OctetString::new(b"Short Message 2".to_vec()).unwrap();
+        let short_message_1 = OctetString::from_static_slice(b"Short Message 101").unwrap();
+        let short_message_2 = OctetString::from_static_slice(b"Short Message 2").unwrap();
 
         let submit_sm = SubmitMulti::builder()
             .short_message(short_message_1)
@@ -454,8 +454,9 @@ mod tests {
 
     #[test]
     fn message_payload_suppresses_short_message() {
-        let short_message = OctetString::new(b"Short Message".to_vec()).unwrap();
-        let message_payload = MessagePayload::new(AnyOctetString::new(b"Message Payload".to_vec()));
+        let short_message = OctetString::from_static_slice(b"Short Message").unwrap();
+        let message_payload =
+            MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload"));
 
         // Using push_tlv
         let submit_sm = SubmitMulti::builder()

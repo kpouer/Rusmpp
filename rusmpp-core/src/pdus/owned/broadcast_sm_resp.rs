@@ -137,7 +137,7 @@ mod tests {
                         BroadcastResponseTlvValue::BroadcastAreaIdentifier(
                             BroadcastAreaIdentifier::new(
                                 BroadcastAreaFormat::Polygon,
-                                AnyOctetString::new(b"Polygon Area".to_vec()),
+                                AnyOctetString::from_static_slice(b"Polygon Area"),
                             ),
                         ),
                     ])
