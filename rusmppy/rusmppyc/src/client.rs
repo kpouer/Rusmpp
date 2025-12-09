@@ -10,7 +10,7 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use pyo3::{pyclass, pymethods, types::PyType, Bound, PyAny, PyObject, PyResult, Python};
+use pyo3::{pyclass, pymethods, types::PyType, Bound, Py, PyAny, PyResult, Python};
 use pyo3_async_runtimes::tokio::future_into_py;
 use rusmpp::{
     pdus::{BindReceiver, BindTransceiver, BindTransmitter, DeliverSmResp, SubmitSm},
@@ -78,8 +78,8 @@ impl Client {
     fn connected<'p>(
         _cls: &'p Bound<'p, PyType>,
         py: Python<'p>,
-        read: PyObject,
-        write: PyObject,
+        read: Py<PyAny>,
+        write: Py<PyAny>,
         enquire_link_interval: Option<u64>,
         enquire_link_response_timeout: u64,
         response_timeout: Option<u64>,
@@ -99,7 +99,7 @@ impl Client {
             let (client, events, connection) = builder.no_spawn().connected(read_write);
 
             // the read and write are python-futures, we spawn them with current locals
-            let task_locals = Python::with_gil(pyo3_async_runtimes::tokio::get_current_locals)?;
+            let task_locals = Python::attach(pyo3_async_runtimes::tokio::get_current_locals)?;
             tokio::spawn(pyo3_async_runtimes::tokio::scope(task_locals, connection));
 
             let events = Box::pin(events.map(Event::from));
