@@ -55,11 +55,22 @@ impl<const N: usize> EmptyOrFullCOctetString<N> {
         Self::_ASSERT_NON_ZERO;
     };
 
+    /// Creates a new [`EmptyOrFullCOctetString`] from a sequence of bytes.
+    #[inline]
+    #[deprecated(note = "use `from_bytes`, `from_slice` or `from_vec` instead")]
+    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
+        Self::_ASSERT_VALID;
+
+        Self::from_slice(bytes.as_ref())
+    }
+
     /// Creates a new empty [`EmptyOrFullCOctetString`].
     ///
     /// Equivalent to [`EmptyOrFullCOctetString::empty`].
     #[inline]
     pub fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 

@@ -30,6 +30,13 @@ impl<'a> ::arbitrary::Arbitrary<'a> for AnyOctetString {
 }
 
 impl AnyOctetString {
+    /// Creates a new [`AnyOctetString`] from a sequence of bytes.
+    #[inline]
+    #[deprecated(note = "use `from_bytes`, `from_slice` or `from_vec` instead")]
+    pub fn new(bytes: impl AsRef<[u8]>) -> Self {
+        Self::from_slice(bytes.as_ref())
+    }
+
     /// Creates a new empty [`AnyOctetString`].
     ///
     /// Equivalent to [`AnyOctetString::empty`].

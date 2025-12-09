@@ -106,11 +106,22 @@ impl<const MIN: usize, const MAX: usize> COctetString<MIN, MAX> {
         arr
     };
 
+    /// Creates a new [`COctetString`] from a sequence of bytes.
+    #[inline]
+    #[deprecated(note = "use `from_bytes`, `from_slice` or `from_vec` instead")]
+    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
+        Self::_ASSERT_VALID;
+
+        Self::from_slice(bytes.as_ref())
+    }
+
     /// Creates a new empty [`COctetString`].
     ///
     /// Equivalent to [`COctetString::empty`].
     #[inline]
     pub fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 

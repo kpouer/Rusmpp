@@ -71,11 +71,22 @@ impl<const MIN: usize, const MAX: usize> OctetString<MIN, MAX> {
         Self::_ASSERT_MIN_LESS_THAN_OR_EQUAL_TO_MAX;
     };
 
+    /// Creates a new [`OctetString`] from a sequence of bytes.
+    #[inline]
+    #[deprecated(note = "use `from_bytes`, `from_slice` or `from_vec` instead")]
+    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
+        Self::_ASSERT_VALID;
+
+        Self::from_slice(bytes.as_ref())
+    }
+
     /// Creates a new empty [`OctetString`].
     ///
     /// Equivalent to [`OctetString::empty`].
     #[inline]
     pub fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 
