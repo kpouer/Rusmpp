@@ -591,9 +591,9 @@ impl TryFrom<g::MessageSubmissionRequestTlvValue> for MessageSubmissionRequestTl
             GValue::DestAddrNpResolution(value) => Self::DestAddrNpResolution(value.into()),
             GValue::DestAddrSubunit(value) => Self::DestAddrSubunit(value.into()),
             GValue::DestBearerType(value) => Self::DestBearerType(value.into()),
-            GValue::DestNetworkId(value) => {
-                Self::DestNetworkId(COctetString::new(value).map_value_err("dest_network_id")?)
-            }
+            GValue::DestNetworkId(value) => Self::DestNetworkId(
+                COctetString::from_bytes(value).map_value_err("dest_network_id")?,
+            ),
             GValue::DestNetworkType(value) => Self::DestNetworkType(value.into()),
             GValue::DestNodeId(value) => {
                 Self::DestNodeId(OctetString::new(value).map_value_err("dest_node_id")?)
@@ -622,9 +622,9 @@ impl TryFrom<g::MessageSubmissionRequestTlvValue> for MessageSubmissionRequestTl
             GValue::SmsSignal(value) => Self::SmsSignal(value),
             GValue::SourceAddrSubunit(value) => Self::SourceAddrSubunit(value.into()),
             GValue::SourceBearerType(value) => Self::SourceBearerType(value.into()),
-            GValue::SourceNetworkId(value) => {
-                Self::SourceNetworkId(COctetString::new(value).map_value_err("source_network_id")?)
-            }
+            GValue::SourceNetworkId(value) => Self::SourceNetworkId(
+                COctetString::from_bytes(value).map_value_err("source_network_id")?,
+            ),
             GValue::SourceNetworkType(value) => Self::SourceNetworkType(value.into()),
             GValue::SourceNodeId(value) => {
                 Self::SourceNodeId(OctetString::new(value).map_value_err("source_node_id")?)
