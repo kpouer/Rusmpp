@@ -56,6 +56,19 @@ impl crate::decode::owned::Decode for u32 {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl crate::decode::bytes::Decode for u32 {
+    fn decode(src: &mut bytes::BytesMut) -> Result<Self, DecodeError> {
+        use bytes::Buf;
+
+        if src.len() < 4 {
+            return Err(DecodeError::unexpected_eof());
+        }
+
+        Ok(src.get_u32())
+    }
+}
+
 impl borrowed::Decode<'_> for u32 {
     fn decode(src: &[u8]) -> Result<(Self, usize), DecodeError> {
         if src.len() < 4 {

@@ -54,6 +54,19 @@ impl crate::decode::owned::Decode for u16 {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl crate::decode::bytes::Decode for u16 {
+    fn decode(src: &mut bytes::BytesMut) -> Result<Self, DecodeError> {
+        use bytes::Buf;
+
+        if src.len() < 2 {
+            return Err(DecodeError::unexpected_eof());
+        }
+
+        Ok(src.get_u16())
+    }
+}
+
 impl borrowed::Decode<'_> for u16 {
     fn decode(src: &[u8]) -> Result<(Self, usize), DecodeError> {
         if src.len() < 2 {
