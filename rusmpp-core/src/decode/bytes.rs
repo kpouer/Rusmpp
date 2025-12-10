@@ -98,20 +98,19 @@ impl<T: Decode> DecodeWithLength for alloc::vec::Vec<T> {
             return Err(DecodeError::unexpected_eof());
         }
 
-        let mut field = src.split_to(length);
-
         let mut vec = alloc::vec::Vec::new();
 
-        while !field.is_empty() {
-            let before = field.len();
+        let src = &mut src.split_to(length);
 
-            let item = T::decode(&mut field)?;
+        let mut size = 0;
 
-            let consumed = before - field.len();
+        while size < length {
+            let len = src.len();
 
-            if consumed == 0 {
-                return Err(DecodeError::unexpected_eof());
-            }
+            let item = T::decode(src)?;
+
+            // No underflow: src.len() is less than len because we consumed some bytes
+            size += len - src.len();
 
             vec.push(item);
         }
