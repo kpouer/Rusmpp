@@ -79,7 +79,8 @@ fn quote_encode(input: &DeriveInput, fields_named: &FieldsNamed) -> TokenStream 
     let field_idents = fields_named
         .named
         .iter()
-        .map(|f| f.ident.as_ref().expect("Named fields must have idents"));
+        .map(|f| f.ident.as_ref().expect("Named fields must have idents"))
+        .collect::<Vec<_>>();
 
     quote! {
         impl #impl_generics crate::encode::Encode for #name #ty_generics #where_clause {
@@ -89,6 +90,15 @@ fn quote_encode(input: &DeriveInput, fields_named: &FieldsNamed) -> TokenStream 
                     let size = crate::encode::EncodeExt::encode_move(&self.#field_idents, dst, size);
                 )*
                 size
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl #impl_generics crate::encode::bytes::Encode for #name #ty_generics #where_clause {
+            fn encode(&self, dst: &mut ::bytes::BytesMut){
+                #(
+                    crate::encode::bytes::Encode::encode(&self.#field_idents, dst);
+                )*
             }
         }
     }
