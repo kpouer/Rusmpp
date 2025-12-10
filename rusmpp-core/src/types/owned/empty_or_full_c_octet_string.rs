@@ -398,11 +398,8 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<EmptyOrFullCOctetString<1>>();
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<EmptyOrFullCOctetString<2>>();
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<EmptyOrFullCOctetString<3>>();
     }
 

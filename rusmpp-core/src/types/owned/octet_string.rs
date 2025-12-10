@@ -384,11 +384,8 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<OctetString<0, 5>>();
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<OctetString<1, 5>>();
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<OctetString<2, 5>>();
     }
 
