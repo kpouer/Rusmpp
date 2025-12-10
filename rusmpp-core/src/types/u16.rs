@@ -29,6 +29,15 @@ impl Encode for u16 {
 }
 
 #[cfg(feature = "alloc")]
+impl crate::encode::bytes::Encode for u16 {
+    fn encode(&self, dst: &mut bytes::BytesMut) {
+        use bytes::BufMut;
+
+        dst.put_u16(*self);
+    }
+}
+
+#[cfg(feature = "alloc")]
 impl crate::decode::owned::Decode for u16 {
     fn decode(src: &[u8]) -> Result<(Self, usize), DecodeError> {
         if src.len() < 2 {

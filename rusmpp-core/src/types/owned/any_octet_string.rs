@@ -1,9 +1,9 @@
 use alloc::{string::String, string::ToString, vec::Vec};
-use bytes::{Bytes, BytesMut};
+use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::{
     decode::{DecodeError, owned::DecodeWithLength},
-    encode::{Encode, Length},
+    encode::{Encode, Length, bytes::Encode as BEncode},
 };
 
 /// No fixed size [`OctetString`](struct@crate::types::owned::octet_string::OctetString).
@@ -199,6 +199,12 @@ impl Encode for AnyOctetString {
         _ = &mut dst[..self.len()].copy_from_slice(&self.bytes);
 
         self.len()
+    }
+}
+
+impl BEncode for AnyOctetString {
+    fn encode(&self, dst: &mut BytesMut) {
+        dst.put(&self.bytes[..]);
     }
 }
 

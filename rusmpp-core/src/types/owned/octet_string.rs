@@ -1,10 +1,10 @@
 #![allow(path_statements)]
 use alloc::{string::String, string::ToString, vec::Vec};
-use bytes::{Bytes, BytesMut};
+use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::{
     decode::{DecodeError, OctetStringDecodeError, owned::DecodeWithLength},
-    encode::{Encode, Length},
+    encode::{Encode, Length, bytes::Encode as BEncode},
     types::octet_string::Error,
 };
 
@@ -273,6 +273,12 @@ impl<const MIN: usize, const MAX: usize> Encode for OctetString<MIN, MAX> {
         _ = &mut dst[..self.len()].copy_from_slice(&self.bytes);
 
         self.len()
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> BEncode for OctetString<MIN, MAX> {
+    fn encode(&self, dst: &mut BytesMut) {
+        dst.put(&self.bytes[..]);
     }
 }
 

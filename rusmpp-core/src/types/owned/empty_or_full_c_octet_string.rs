@@ -1,11 +1,11 @@
 #![allow(path_statements)]
 
 use alloc::{string::String, string::ToString, vec::Vec};
-use bytes::{Bytes, BytesMut};
+use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::{
     decode::{COctetStringDecodeError, DecodeError, owned::Decode},
-    encode::{Encode, Length},
+    encode::{Encode, Length, bytes::Encode as BEncode},
     types::empty_or_full_c_octet_string::Error,
 };
 
@@ -281,6 +281,12 @@ impl<const N: usize> Encode for EmptyOrFullCOctetString<N> {
         _ = &mut dst[..self.len()].copy_from_slice(&self.bytes);
 
         self.len()
+    }
+}
+
+impl<const N: usize> BEncode for EmptyOrFullCOctetString<N> {
+    fn encode(&self, dst: &mut BytesMut) {
+        dst.put(&self.bytes[..]);
     }
 }
 
