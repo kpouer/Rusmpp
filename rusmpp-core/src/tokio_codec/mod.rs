@@ -257,12 +257,12 @@ impl Decoder for CommandCodec {
                         // Reserve enough space to read the entire command
                         src.reserve(pdu_length - src.len());
 
-                        trace!(target: "rusmpp::codec::decode", command_length, "Not enough bytes to read the entire command");
+                        trace!(target: "rusmpp::codec::decode", command_length, decode_length=pdu_length, "Not enough bytes to read the entire command");
 
                         return Ok(None);
                     }
 
-                    debug!(target: "rusmpp::codec::decode", command_length, decoding=?crate::formatter::Formatter(&src[..pdu_length]), "Decoding");
+                    debug!(target: "rusmpp::codec::decode", command_length, decode_length=pdu_length, decoding=?crate::formatter::Formatter(&src[..pdu_length]), "Decoding");
 
                     let (command, _size) = match Command::decode(src, pdu_length) {
                         Ok((command, size)) => {
