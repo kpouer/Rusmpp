@@ -339,7 +339,7 @@ impl<const N: usize> Decode for EmptyOrFullCOctetString<N> {
 }
 
 impl<const N: usize> BDecode for EmptyOrFullCOctetString<N> {
-    fn decode(src: &mut BytesMut) -> Result<Self, DecodeError> {
+    fn decode(src: &mut BytesMut) -> Result<(Self, usize), DecodeError> {
         Self::_ASSERT_VALID;
 
         if src.is_empty() {
@@ -369,7 +369,7 @@ impl<const N: usize> BDecode for EmptyOrFullCOctetString<N> {
             ));
         }
 
-        Ok(Self { bytes })
+        Ok((Self { bytes }, len))
     }
 }
 
@@ -713,10 +713,11 @@ mod tests {
             assert_eq!(&bytes[size..], b"World!");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <EmptyOrFullCOctetString<6> as BDecode>::decode(&mut buf).unwrap();
+            let (string, size) = <EmptyOrFullCOctetString<6> as BDecode>::decode(&mut buf).unwrap();
 
             assert_eq!(string.as_ref(), b"Hello\0");
             assert_eq!(string.length(), 6);
+            assert_eq!(size, 6);
             assert_eq!(&buf[..], b"World!");
         }
 
@@ -731,10 +732,11 @@ mod tests {
             assert_eq!(&bytes[size..], b"World!");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <EmptyOrFullCOctetString<6> as BDecode>::decode(&mut buf).unwrap();
+            let (string, size) = <EmptyOrFullCOctetString<6> as BDecode>::decode(&mut buf).unwrap();
 
             assert_eq!(string.as_ref(), b"\0");
             assert_eq!(string.length(), 1);
+            assert_eq!(size, 1);
             assert_eq!(&buf[..], b"World!");
         }
     }

@@ -47,14 +47,14 @@ impl crate::decode::owned::Decode for u8 {
 
 #[cfg(feature = "alloc")]
 impl crate::decode::bytes::Decode for u8 {
-    fn decode(src: &mut bytes::BytesMut) -> Result<Self, DecodeError> {
+    fn decode(src: &mut bytes::BytesMut) -> Result<(Self, usize), DecodeError> {
         use bytes::Buf;
 
         if src.is_empty() {
             return Err(DecodeError::unexpected_eof());
         }
 
-        Ok(src.get_u8())
+        Ok((src.get_u8(), 1))
     }
 }
 

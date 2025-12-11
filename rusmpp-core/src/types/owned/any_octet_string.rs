@@ -228,14 +228,14 @@ impl DecodeWithLength for AnyOctetString {
 }
 
 impl BDecodeWithLength for AnyOctetString {
-    fn decode(src: &mut BytesMut, length: usize) -> Result<Self, DecodeError> {
+    fn decode(src: &mut BytesMut, length: usize) -> Result<(Self, usize), DecodeError> {
         if src.len() < length {
             return Err(DecodeError::unexpected_eof());
         }
 
         let bytes = src.split_to(length).freeze();
 
-        Ok(Self { bytes })
+        Ok((Self { bytes }, length))
     }
 }
 
@@ -335,10 +335,12 @@ mod tests {
             assert_eq!(&bytes[size..], b"");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <AnyOctetString as BDecodeWithLength>::decode(&mut buf, 5).unwrap();
+            let (string, size) =
+                <AnyOctetString as BDecodeWithLength>::decode(&mut buf, 5).unwrap();
 
             assert_eq!(string.as_ref(), b"Hello");
             assert_eq!(string.length(), 5);
+            assert_eq!(size, 5);
             assert!(buf.is_empty());
         }
 
@@ -353,10 +355,12 @@ mod tests {
             assert_eq!(&bytes[size..], b"lo");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <AnyOctetString as BDecodeWithLength>::decode(&mut buf, 3).unwrap();
+            let (string, size) =
+                <AnyOctetString as BDecodeWithLength>::decode(&mut buf, 3).unwrap();
 
             assert_eq!(string.as_ref(), b"Hel");
             assert_eq!(string.length(), 3);
+            assert_eq!(size, 3);
             assert_eq!(&buf[..], b"lo");
         }
     }

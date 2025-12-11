@@ -323,7 +323,7 @@ impl<const MIN: usize, const MAX: usize> DecodeWithLength for OctetString<MIN, M
 }
 
 impl<const MIN: usize, const MAX: usize> BDecodeWithLength for OctetString<MIN, MAX> {
-    fn decode(src: &mut BytesMut, length: usize) -> Result<Self, DecodeError> {
+    fn decode(src: &mut BytesMut, length: usize) -> Result<(Self, usize), DecodeError> {
         Self::_ASSERT_VALID;
 
         if length > MAX {
@@ -350,7 +350,7 @@ impl<const MIN: usize, const MAX: usize> BDecodeWithLength for OctetString<MIN, 
 
         let bytes = src.split_to(length).freeze();
 
-        Ok(Self { bytes })
+        Ok((Self { bytes }, length))
     }
 }
 
@@ -561,10 +561,12 @@ mod tests {
             assert_eq!(&bytes[size..], b"");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <OctetString<0, 5> as BDecodeWithLength>::decode(&mut buf, 5).unwrap();
+            let (string, size) =
+                <OctetString<0, 5> as BDecodeWithLength>::decode(&mut buf, 5).unwrap();
 
             assert_eq!(string.as_ref(), b"Hello");
             assert_eq!(string.length(), 5);
+            assert_eq!(size, 5);
             assert!(buf.is_empty());
         }
 
@@ -579,10 +581,12 @@ mod tests {
             assert_eq!(&bytes[size..], b"lo");
 
             let mut buf = BytesMut::from(&bytes[..]);
-            let string = <OctetString<0, 5> as BDecodeWithLength>::decode(&mut buf, 3).unwrap();
+            let (string, size) =
+                <OctetString<0, 5> as BDecodeWithLength>::decode(&mut buf, 3).unwrap();
 
             assert_eq!(string.as_ref(), b"Hel");
             assert_eq!(string.length(), 3);
+            assert_eq!(size, 3);
             assert_eq!(&buf[..], b"lo");
         }
     }
