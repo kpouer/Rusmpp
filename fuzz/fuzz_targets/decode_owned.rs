@@ -14,7 +14,7 @@ use libfuzzer_sys::fuzz_target;
 use rusmpp_core::{
     command::owned::Command,
     decode::owned::DecodeWithLength,
-    encode::{bytes::Encode, Length},
+    encode::{owned::Encode, Length},
     tokio_codec::CommandCodec,
 };
 use tokio_util::codec::Decoder;

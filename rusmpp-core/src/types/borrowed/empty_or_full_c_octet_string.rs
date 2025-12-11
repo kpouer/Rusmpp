@@ -156,7 +156,7 @@ impl<const N: usize> Encode for EmptyOrFullCOctetString<'_, N> {
 }
 
 #[cfg(feature = "alloc")]
-impl<const N: usize> crate::encode::bytes::Encode for EmptyOrFullCOctetString<'_, N> {
+impl<const N: usize> crate::encode::owned::Encode for EmptyOrFullCOctetString<'_, N> {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         use bytes::BufMut;
 

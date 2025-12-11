@@ -58,7 +58,7 @@ impl Repr {
             }
 
             #[cfg(feature = "alloc")]
-            impl crate::encode::bytes::Encode for #name {
+            impl crate::encode::owned::Encode for #name {
                 fn encode(&self, dst: &mut ::bytes::BytesMut){
                     #repr_ident::from(*self).encode(dst)
                 }

@@ -94,10 +94,10 @@ fn quote_encode(input: &DeriveInput, fields_named: &FieldsNamed) -> TokenStream 
         }
 
         #[cfg(feature = "alloc")]
-        impl #impl_generics crate::encode::bytes::Encode for #name #ty_generics #where_clause {
+        impl #impl_generics crate::encode::owned::Encode for #name #ty_generics #where_clause {
             fn encode(&self, dst: &mut ::bytes::BytesMut){
                 #(
-                    crate::encode::bytes::Encode::encode(&self.#field_idents, dst);
+                    crate::encode::owned::Encode::encode(&self.#field_idents, dst);
                 )*
             }
         }

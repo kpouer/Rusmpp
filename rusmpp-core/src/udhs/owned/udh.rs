@@ -107,7 +107,7 @@ impl crate::encode::Encode for UdhValue {
     }
 }
 
-impl crate::encode::bytes::Encode for UdhValue {
+impl crate::encode::owned::Encode for UdhValue {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         match self {
             UdhValue::ConcatenatedShortMessage8Bit(udh) => udh.encode(dst),

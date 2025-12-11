@@ -308,7 +308,7 @@ impl<const N: usize> crate::encode::Encode for Pdu<'_, N> {
 }
 
 #[cfg(feature = "alloc")]
-impl<const N: usize> crate::encode::bytes::Encode for Pdu<'_, N> {
+impl<const N: usize> crate::encode::owned::Encode for Pdu<'_, N> {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         match self {
             Pdu::BindTransmitter(body) => body.encode(dst),

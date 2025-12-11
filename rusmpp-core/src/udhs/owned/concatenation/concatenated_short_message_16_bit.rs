@@ -165,7 +165,7 @@ impl crate::encode::Encode for ConcatenatedShortMessage16Bit {
     }
 }
 
-impl crate::encode::bytes::Encode for ConcatenatedShortMessage16Bit {
+impl crate::encode::owned::Encode for ConcatenatedShortMessage16Bit {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         let bytes = self.bytes();
 

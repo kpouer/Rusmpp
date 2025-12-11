@@ -3,7 +3,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::{
     decode::{DecodeError, owned::DecodeWithLength},
-    encode::{Encode, Length, bytes::Encode as BEncode},
+    encode::{Encode, Length, owned::Encode as BEncode},
 };
 
 /// No fixed size [`OctetString`](struct@crate::types::owned::octet_string::OctetString).

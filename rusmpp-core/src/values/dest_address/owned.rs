@@ -39,7 +39,7 @@ impl crate::encode::Encode for DestAddress {
     }
 }
 
-impl crate::encode::bytes::Encode for DestAddress {
+impl crate::encode::owned::Encode for DestAddress {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         match self {
             Self::SmeAddress(sa) => sa.encode(dst),

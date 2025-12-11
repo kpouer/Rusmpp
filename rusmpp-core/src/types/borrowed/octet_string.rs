@@ -153,7 +153,7 @@ impl<const MIN: usize, const MAX: usize> Encode for OctetString<'_, MIN, MAX> {
 }
 
 #[cfg(feature = "alloc")]
-impl<const MIN: usize, const MAX: usize> crate::encode::bytes::Encode
+impl<const MIN: usize, const MAX: usize> crate::encode::owned::Encode
     for OctetString<'_, MIN, MAX>
 {
     fn encode(&self, dst: &mut bytes::BytesMut) {

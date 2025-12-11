@@ -91,7 +91,7 @@ impl Encode for AnyOctetString<'_> {
 }
 
 #[cfg(feature = "alloc")]
-impl crate::encode::bytes::Encode for AnyOctetString<'_> {
+impl crate::encode::owned::Encode for AnyOctetString<'_> {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         use bytes::BufMut;
 

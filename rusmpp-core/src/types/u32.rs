@@ -31,7 +31,7 @@ impl Encode for u32 {
 }
 
 #[cfg(feature = "alloc")]
-impl crate::encode::bytes::Encode for u32 {
+impl crate::encode::owned::Encode for u32 {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         use bytes::BufMut;
 

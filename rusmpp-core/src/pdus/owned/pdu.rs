@@ -310,7 +310,7 @@ impl crate::encode::Encode for Pdu {
     }
 }
 
-impl crate::encode::bytes::Encode for Pdu {
+impl crate::encode::owned::Encode for Pdu {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         match self {
             Pdu::BindTransmitter(body) => body.encode(dst),

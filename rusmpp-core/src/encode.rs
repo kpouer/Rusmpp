@@ -151,7 +151,7 @@ impl<T: Encode, const N: usize> Encode for heapless::vec::Vec<T, N> {
 
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-pub mod bytes {
+pub mod owned {
     //! Traits for encoding `SMPP` values using a bytes buffer.
 
     use bytes::BytesMut;
@@ -164,7 +164,7 @@ pub mod bytes {
     ///
     /// ```rust
     /// # use bytes::BytesMut;
-    /// # use rusmpp_core::encode::{bytes::Encode, Length};
+    /// # use rusmpp_core::encode::{owned::Encode, Length};
     ///
     /// struct Foo {
     ///     a: u8,
@@ -373,14 +373,14 @@ mod tests {
     }
 
     #[cfg(feature = "alloc")]
-    mod bytes {
+    mod owned {
         use bytes::BytesMut;
 
         use crate::types::owned::{
             AnyOctetString, COctetString, EmptyOrFullCOctetString, OctetString,
         };
 
-        use super::super::{Length, bytes::Encode};
+        use super::super::{Length, owned::Encode};
 
         #[test]
         fn encode_option() {

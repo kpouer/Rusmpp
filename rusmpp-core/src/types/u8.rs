@@ -26,7 +26,7 @@ impl Encode for u8 {
 }
 
 #[cfg(feature = "alloc")]
-impl crate::encode::bytes::Encode for u8 {
+impl crate::encode::owned::Encode for u8 {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         use bytes::BufMut;
 

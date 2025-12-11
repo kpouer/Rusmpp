@@ -336,7 +336,7 @@ impl crate::encode::Encode for TlvValue {
     }
 }
 
-impl crate::encode::bytes::Encode for TlvValue {
+impl crate::encode::owned::Encode for TlvValue {
     fn encode(&self, dst: &mut bytes::BytesMut) {
         match self {
             TlvValue::AdditionalStatusInfoText(value) => value.encode(dst),

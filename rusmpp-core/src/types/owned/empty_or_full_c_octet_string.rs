@@ -5,7 +5,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::{
     decode::{COctetStringDecodeError, DecodeError, owned::Decode},
-    encode::{Encode, Length, bytes::Encode as BEncode},
+    encode::{Encode, Length, owned::Encode as BEncode},
     types::empty_or_full_c_octet_string::Error,
 };
 

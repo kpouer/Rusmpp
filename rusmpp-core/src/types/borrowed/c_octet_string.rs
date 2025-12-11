@@ -206,7 +206,7 @@ impl<const MIN: usize, const MAX: usize> Encode for COctetString<'_, MIN, MAX> {
 }
 
 #[cfg(feature = "alloc")]
-impl<const MIN: usize, const MAX: usize> crate::encode::bytes::Encode
+impl<const MIN: usize, const MAX: usize> crate::encode::owned::Encode
     for COctetString<'_, MIN, MAX>
 {
     fn encode(&self, dst: &mut bytes::BytesMut) {

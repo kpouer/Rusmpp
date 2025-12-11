@@ -6,7 +6,7 @@ use crate::{
     CommandId,
     command::owned::Command,
     decode::owned::{Decode, DecodeWithLength},
-    encode::{Length, bytes::Encode},
+    encode::{Length, owned::Encode},
     pdus::owned::*,
     tests::TestInstance,
     types::owned::AnyOctetString,

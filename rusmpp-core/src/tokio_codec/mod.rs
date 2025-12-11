@@ -11,7 +11,7 @@ use tokio_util::{
 use crate::{
     command::owned::Command,
     decode::owned::DecodeWithLength,
-    encode::{Length, bytes::Encode},
+    encode::{Length, owned::Encode},
     logging::{debug, error, trace},
 };
 
