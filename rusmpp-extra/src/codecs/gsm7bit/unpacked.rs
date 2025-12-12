@@ -67,7 +67,10 @@ mod impl_owned {
 
     use crate::{
         codecs::{
-            gsm7bit::errors::{Gsm7BitConcatenateError, Gsm7BitEncodeError},
+            gsm7bit::{
+                alphabet::ESCAPE_CHARACTER,
+                errors::{Gsm7BitConcatenateError, Gsm7BitEncodeError},
+            },
             owned::Encoder,
         },
         concatenation::{
@@ -129,7 +132,7 @@ mod impl_owned {
                 if !self.allow_split_extended_character {
                     // If not last part AND the last byte of this part is 0x1B,
                     // we must shrink the part to avoid splitting ESC + next byte.
-                    if end < total && encoded[end - 1] == 0x1B {
+                    if end < total && encoded[end - 1] == ESCAPE_CHARACTER {
                         end -= 1;
 
                         // If shrinking removed the entire part -> impossible

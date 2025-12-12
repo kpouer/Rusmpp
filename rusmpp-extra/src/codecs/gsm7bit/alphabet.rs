@@ -2,6 +2,9 @@ mod default;
 
 pub use default::Gsm7BitDefaultAlphabet;
 
+/// Gsm 7-bit escape character.
+pub const ESCAPE_CHARACTER: u8 = 0x1B;
+
 /// GSM 7-bit alphabet.
 #[derive(Debug)]
 #[non_exhaustive]
@@ -54,7 +57,7 @@ impl Gsm7BitAlphabet {
             match self.encode(ch) {
                 Some(Encoded::Standard(byte)) => encoded.push(byte),
                 Some(Encoded::Extended(byte)) => {
-                    encoded.push(0x1B);
+                    encoded.push(ESCAPE_CHARACTER);
                     encoded.push(byte);
                 }
                 None => return Err(ch),
