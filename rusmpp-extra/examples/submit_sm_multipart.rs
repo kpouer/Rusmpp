@@ -38,8 +38,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
         // short_message will be overridden by `short_message` of the multipart builder.
         .short_message(OctetString::from_str("Hi, I am a short message.")?)
         .build()
-        .multipart()
-        .short_message(message)
+        .multipart(message)
         .reference_u16(1)
         .gsm7bit_unpacked()
         .build()?;

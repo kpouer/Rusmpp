@@ -28,28 +28,19 @@ pub struct SubmitSmMultipartBuilder<'a, E> {
     concatenation_type: ConcatenatedShortMessageType,
 }
 
-impl<E> SubmitSmMultipartBuilder<'static, E> {
+impl<'a, E> SubmitSmMultipartBuilder<'a, E> {
     /// Creates a new [`SubmitSmMultipartBuilder`].
-    const fn new(sm: SubmitSm, encoder: E) -> SubmitSmMultipartBuilder<'static, E> {
+    const fn new(
+        short_message: &'a str,
+        sm: SubmitSm,
+        encoder: E,
+    ) -> SubmitSmMultipartBuilder<'a, E> {
         Self {
-            short_message: "",
+            short_message,
             max_short_message_size: SubmitSm::default_max_short_message_size(),
             sm,
             encoder,
             concatenation_type: ConcatenatedShortMessageType::u8(0),
-        }
-    }
-}
-
-impl<'a, E> SubmitSmMultipartBuilder<'a, E> {
-    /// Sets the short message.
-    pub fn short_message<'b>(self, short_message: &'b str) -> SubmitSmMultipartBuilder<'b, E> {
-        SubmitSmMultipartBuilder {
-            short_message,
-            max_short_message_size: self.max_short_message_size,
-            sm: self.sm,
-            encoder: self.encoder,
-            concatenation_type: self.concatenation_type,
         }
     }
 
@@ -194,11 +185,15 @@ pub trait SubmitSmMultipartExt {
     /// - [`SubmitSm::esm_class`] will be updated with UDHI indicator by the multipart builder.
     /// - [`SubmitSm::data_coding`] will be overridden by the multipart builder to match the encoder.
     /// - [`SubmitSm::short_message`] will be overridden by `short_message` of the multipart builder.
-    fn multipart(self) -> SubmitSmMultipartBuilder<'static, Gsm7BitUnpacked>;
+    fn multipart<'a>(self, short_message: &'a str)
+    -> SubmitSmMultipartBuilder<'a, Gsm7BitUnpacked>;
 }
 
 impl SubmitSmMultipartExt for SubmitSm {
-    fn multipart(self) -> SubmitSmMultipartBuilder<'static, Gsm7BitUnpacked> {
-        SubmitSmMultipartBuilder::new(self, Gsm7BitUnpacked::new())
+    fn multipart<'a>(
+        self,
+        short_message: &'a str,
+    ) -> SubmitSmMultipartBuilder<'a, Gsm7BitUnpacked> {
+        SubmitSmMultipartBuilder::new(short_message, self, Gsm7BitUnpacked::new())
     }
 }

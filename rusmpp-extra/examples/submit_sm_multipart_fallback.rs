@@ -26,8 +26,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
         .source_addr(COctetString::from_str("12345")?)
         .destination_addr(COctetString::from_str("491701234567")?)
         .build()
-        .multipart()
-        .short_message("Hi This message can not be encoded in gsm 7-bit default alphabet so it will fallback to ucs2: 你好")
+        .multipart("Hi This message can not be encoded in gsm 7-bit default alphabet so it will fallback to ucs2: 你好")
         .encoder(Gsm7BitUnpacked::new().with_alphabet(Gsm7BitAlphabet::default()))
         .fallback(Ucs2::new())
         .build()?;
