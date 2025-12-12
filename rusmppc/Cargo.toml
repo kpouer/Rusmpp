@@ -15,6 +15,7 @@ rusmpp = { path = "../rusmpp", version = "0.3.0-alpha.1", default-features = fal
     "tokio-codec",
     "tracing",
     "verbose",
+    "extra",
 ] }
 tokio = { version = "1.48.0", default-features = false, features = ["sync"] }
 tokio-stream = { version = "0.1.17", default-features = false }
@@ -93,6 +94,11 @@ required-features = []
 [[example]]
 name = "rusmppc_submit_sm"
 path = "examples/rusmppc_submit_sm.rs"
+required-features = []
+
+[[example]]
+name = "rusmppc_submit_sm_multipart"
+path = "examples/rusmppc_submit_sm_multipart.rs"
 required-features = []
 
 [[example]]
