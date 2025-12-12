@@ -24,6 +24,9 @@ rusmpp-core = { path = "../rusmpp-core", version = "0.3.0", default-features = f
     "alloc",
     "tokio-codec",
 ] }
+rusmpp-extra = { path = "../rusmpp-extra", default-features = false, features = [
+    "alloc",
+] }
 
 [features]
 default = ["tokio-codec"]
@@ -31,6 +34,8 @@ default = ["tokio-codec"]
 tokio-codec = ["rusmpp-core/tokio-codec"]
 # Enables verbose DecodeError with DecodeErrorSource.
 verbose = ["rusmpp-core/verbose"]
+# Enables encoding/decoding and concatenation support for SubmitSm.
+extra = ["rusmpp-extra/encoding", "rusmpp-extra/concatenation"]
 # Derives serde Serialize for all SMPP types.
 serde = ["rusmpp-core/serde"]
 # Derives serde Deserialize for all SMPP types. This will allow to create unchecked SMPP values from arbitrary serialized data, which may not be valid SMPP values.
@@ -41,6 +46,7 @@ pretty-hex-fmt = ["rusmpp-core/pretty-hex-fmt"]
 char-fmt = ["rusmpp-core/char-fmt"]
 # Enables logging via the `tracing` crate.
 tracing = ["rusmpp-core/tracing"]
+
 
 [[example]]
 name = "client_server"
