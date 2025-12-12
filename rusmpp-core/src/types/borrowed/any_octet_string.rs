@@ -13,7 +13,7 @@ pub struct AnyOctetString<'a> {
 }
 
 impl<'a> AnyOctetString<'a> {
-    /// Create a new empty [`AnyOctetString`].
+    /// Creates a new empty [`AnyOctetString`].
     ///
     /// Equivalent to [`AnyOctetString::empty`].
     #[inline]
@@ -21,13 +21,19 @@ impl<'a> AnyOctetString<'a> {
         Self::empty()
     }
 
-    /// Create a new empty [`AnyOctetString`].
+    /// Creates a new empty [`AnyOctetString`].
     #[inline]
     pub const fn empty() -> Self {
         Self { bytes: &[] }
     }
 
-    /// Check if an [`AnyOctetString`] is empty.
+    /// Returns the number of bytes contained in the [`AnyOctetString`].
+    #[inline]
+    pub const fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
+    /// Checks if an [`AnyOctetString`] is empty.
     ///
     /// An [`AnyOctetString`] is considered empty if it
     /// contains no octets.
@@ -36,22 +42,22 @@ impl<'a> AnyOctetString<'a> {
         self.bytes.is_empty()
     }
 
-    /// Create a new [`AnyOctetString`] from a sequence of bytes.
+    /// Creates a new [`AnyOctetString`] from &[[`u8`]].
     #[inline]
     pub const fn new(bytes: &'a [u8]) -> Self {
         Self { bytes }
     }
 
-    /// Convert an [`AnyOctetString`] to a &[`str`].
-    #[inline]
-    pub fn to_str(&self) -> Result<&str, core::str::Utf8Error> {
-        core::str::from_utf8(self.bytes)
-    }
-
-    /// Get the bytes of an [`AnyOctetString`].
+    /// Returns the bytes of the [`AnyOctetString`].
     #[inline]
     pub const fn bytes(&self) -> &[u8] {
         self.bytes
+    }
+
+    /// Interprets the [`AnyOctetString`] as &[`str`].
+    #[inline]
+    pub fn to_str(&self) -> Result<&str, core::str::Utf8Error> {
+        core::str::from_utf8(self.bytes)
     }
 }
 
@@ -76,17 +82,37 @@ impl core::fmt::Display for AnyOctetString<'_> {
     }
 }
 
+impl core::convert::AsRef<[u8]> for AnyOctetString<'_> {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl core::borrow::Borrow<[u8]> for AnyOctetString<'_> {
+    fn borrow(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl core::ops::Deref for AnyOctetString<'_> {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.bytes
+    }
+}
+
 impl Length for AnyOctetString<'_> {
     fn length(&self) -> usize {
-        self.bytes.len()
+        self.len()
     }
 }
 
 impl Encode for AnyOctetString<'_> {
     fn encode(&self, dst: &mut [u8]) -> usize {
-        _ = &mut dst[..self.bytes.len()].copy_from_slice(self.bytes);
+        _ = &mut dst[..self.len()].copy_from_slice(self.bytes);
 
-        self.bytes.len()
+        self.len()
     }
 }
 

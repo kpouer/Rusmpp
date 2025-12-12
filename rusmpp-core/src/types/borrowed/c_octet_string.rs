@@ -86,15 +86,17 @@ impl<'a, const MIN: usize, const MAX: usize> COctetString<'a, MIN, MAX> {
         arr
     };
 
-    /// Create a new empty [`COctetString`].
+    /// Creates a new empty [`COctetString`].
     ///
     /// Equivalent to [`COctetString::empty`].
     #[inline]
     pub const fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 
-    /// Create a new empty [`COctetString`].
+    /// Creates a new empty [`COctetString`].
     #[inline]
     pub const fn empty() -> Self {
         Self::_ASSERT_VALID;
@@ -104,16 +106,22 @@ impl<'a, const MIN: usize, const MAX: usize> COctetString<'a, MIN, MAX> {
         }
     }
 
-    /// Check if a [`COctetString`] is empty.
+    /// Returns the number of bytes contained in the [`COctetString`] including the null terminator.
+    #[inline]
+    pub const fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
+    /// Checks if the [`COctetString`] is empty.
     ///
     /// A [`COctetString`] is considered empty if it
     /// contains only a single NULL octet (0x00).
     #[inline]
     pub const fn is_empty(&self) -> bool {
-        self.bytes.len() == 1
+        self.len() == 1
     }
 
-    /// Create a new [`COctetString`] from a sequence of bytes.
+    /// Creates a new [`COctetString`] from &[[`u8`]] including the null terminator.
     pub fn new(bytes: &'a [u8]) -> Result<Self, Error> {
         Self::_ASSERT_VALID;
 
@@ -148,7 +156,7 @@ impl<'a, const MIN: usize, const MAX: usize> COctetString<'a, MIN, MAX> {
         Ok(Self { bytes })
     }
 
-    /// Create a new [`COctetString`] from a sequence of bytes without checking the length and null termination.
+    /// Create a new [`COctetString`] from `&'static [u8]` without checking the length and the null terminator.
     #[inline]
     pub(crate) const fn new_unchecked(bytes: &'a [u8]) -> Self {
         Self::_ASSERT_VALID;
@@ -156,17 +164,17 @@ impl<'a, const MIN: usize, const MAX: usize> COctetString<'a, MIN, MAX> {
         Self { bytes }
     }
 
-    /// Convert a [`COctetString`] to a &[`str`].
+    /// Returns the bytes of the [`COctetString`].
+    #[inline]
+    pub const fn bytes(&self) -> &[u8] {
+        self.bytes
+    }
+
+    /// Interprets the [`COctetString`] as &[`str`] without the null terminator.
     #[inline]
     pub fn as_str(&self) -> &str {
         core::str::from_utf8(&self.bytes[..self.bytes.len() - 1])
             .expect("COctetString is ascii by definition")
-    }
-
-    /// Get the bytes of a [`COctetString`].
-    #[inline]
-    pub const fn bytes(&self) -> &[u8] {
-        self.bytes
     }
 }
 
@@ -191,17 +199,37 @@ impl<const MIN: usize, const MAX: usize> core::fmt::Display for COctetString<'_,
     }
 }
 
+impl<const MIN: usize, const MAX: usize> core::convert::AsRef<[u8]> for COctetString<'_, MIN, MAX> {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> core::borrow::Borrow<[u8]> for COctetString<'_, MIN, MAX> {
+    fn borrow(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> core::ops::Deref for COctetString<'_, MIN, MAX> {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.bytes
+    }
+}
+
 impl<const MIN: usize, const MAX: usize> Length for COctetString<'_, MIN, MAX> {
     fn length(&self) -> usize {
-        self.bytes.len()
+        self.len()
     }
 }
 
 impl<const MIN: usize, const MAX: usize> Encode for COctetString<'_, MIN, MAX> {
     fn encode(&self, dst: &mut [u8]) -> usize {
-        _ = &mut dst[..self.bytes.len()].copy_from_slice(self.bytes);
+        _ = &mut dst[..self.len()].copy_from_slice(self.bytes);
 
-        self.bytes.len()
+        self.len()
     }
 }
 

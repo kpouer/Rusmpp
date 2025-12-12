@@ -34,23 +34,35 @@ pub struct EmptyOrFullCOctetString<'a, const N: usize> {
 impl<'a, const N: usize> EmptyOrFullCOctetString<'a, N> {
     const _ASSERT_NON_ZERO: () = assert!(N > 0, "N must be greater than 0");
 
-    /// Create a new empty [`EmptyOrFullCOctetString`].
+    const _ASSERT_VALID: () = {
+        Self::_ASSERT_NON_ZERO;
+    };
+
+    /// Creates a new empty [`EmptyOrFullCOctetString`].
     ///
     /// Equivalent to [`EmptyOrFullCOctetString::empty`].
     #[inline]
     pub const fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 
-    /// Create a new empty [`EmptyOrFullCOctetString`].
+    /// Creates a new empty [`EmptyOrFullCOctetString`].
     #[inline]
     pub const fn empty() -> Self {
-        Self::_ASSERT_NON_ZERO;
+        Self::_ASSERT_VALID;
 
         Self { bytes: &[0] }
     }
 
-    /// Check if an [`EmptyOrFullCOctetString`] is empty.
+    /// Returns the number of bytes contained in the [`EmptyOrFullCOctetString`] including the null terminator.
+    #[inline]
+    pub const fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
+    /// Checks if the [`EmptyOrFullCOctetString`] is empty.
     ///
     /// An [`EmptyOrFullCOctetString`] is considered empty if it
     /// contains only a single NULL octet `(0x00)`.
@@ -59,9 +71,9 @@ impl<'a, const N: usize> EmptyOrFullCOctetString<'a, N> {
         self.bytes.len() == 1
     }
 
-    /// Create a new [`EmptyOrFullCOctetString`] from a sequence of bytes including a null terminator.
+    /// Creates a new [`EmptyOrFullCOctetString`] from &[[`u8`]] including the null terminator.
     pub fn new(bytes: &'a [u8]) -> Result<Self, Error> {
-        Self::_ASSERT_NON_ZERO;
+        Self::_ASSERT_VALID;
 
         // We must have at least the null terminator
         if bytes.is_empty() {
@@ -105,17 +117,17 @@ impl<'a, const N: usize> EmptyOrFullCOctetString<'a, N> {
         Ok(Self { bytes })
     }
 
-    /// Convert an [`EmptyOrFullCOctetString`] to a &[`str`] without the null terminator.
+    /// Returns the bytes of the [`EmptyOrFullCOctetString`].
+    #[inline]
+    pub const fn bytes(&self) -> &[u8] {
+        self.bytes
+    }
+
+    /// Interprets the [`EmptyOrFullCOctetString`] as &[`str`] without the null terminator.
     #[inline]
     pub fn as_str(&self) -> &str {
         core::str::from_utf8(&self.bytes[0..self.bytes.len() - 1])
             .expect("EmptyOrFullCOctetString is ascii by definition")
-    }
-
-    /// Get the bytes of an [`EmptyOrFullCOctetString`].
-    #[inline]
-    pub const fn bytes(&self) -> &[u8] {
-        self.bytes
     }
 }
 
@@ -141,17 +153,37 @@ impl<const N: usize> core::fmt::Display for EmptyOrFullCOctetString<'_, N> {
     }
 }
 
+impl<const N: usize> core::convert::AsRef<[u8]> for EmptyOrFullCOctetString<'_, N> {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const N: usize> core::borrow::Borrow<[u8]> for EmptyOrFullCOctetString<'_, N> {
+    fn borrow(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const N: usize> core::ops::Deref for EmptyOrFullCOctetString<'_, N> {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.bytes
+    }
+}
+
 impl<const N: usize> Length for EmptyOrFullCOctetString<'_, N> {
     fn length(&self) -> usize {
-        self.bytes.len()
+        self.len()
     }
 }
 
 impl<const N: usize> Encode for EmptyOrFullCOctetString<'_, N> {
     fn encode(&self, dst: &mut [u8]) -> usize {
-        _ = &mut dst[..self.bytes.len()].copy_from_slice(self.bytes);
+        _ = &mut dst[..self.len()].copy_from_slice(self.bytes);
 
-        self.bytes.len()
+        self.len()
     }
 }
 
@@ -166,7 +198,7 @@ impl<const N: usize> crate::encode::owned::Encode for EmptyOrFullCOctetString<'_
 
 impl<'a, const N: usize> Decode<'a> for EmptyOrFullCOctetString<'a, N> {
     fn decode(src: &'a [u8]) -> Result<(Self, usize), DecodeError> {
-        Self::_ASSERT_NON_ZERO;
+        Self::_ASSERT_VALID;
 
         for i in 0..N {
             if i >= src.len() {

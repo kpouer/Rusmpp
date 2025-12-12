@@ -51,23 +51,35 @@ impl<'a, const MIN: usize, const MAX: usize> OctetString<'a, MIN, MAX> {
     const _ASSERT_MIN_LESS_THAN_OR_EQUAL_TO_MAX: () =
         assert!(MIN <= MAX, "MIN must be less than or equal to MAX");
 
-    /// Create a new empty [`OctetString`].
+    const _ASSERT_VALID: () = {
+        Self::_ASSERT_MIN_LESS_THAN_OR_EQUAL_TO_MAX;
+    };
+
+    /// Creates a new empty [`OctetString`].
     ///
     /// Equivalent to [`OctetString::empty`].
     #[inline]
     pub const fn null() -> Self {
+        Self::_ASSERT_VALID;
+
         Self::empty()
     }
 
-    /// Create a new empty [`OctetString`].
+    /// Creates a new empty [`OctetString`].
     #[inline]
     pub const fn empty() -> Self {
-        Self::_ASSERT_MIN_LESS_THAN_OR_EQUAL_TO_MAX;
+        Self::_ASSERT_VALID;
 
         Self { bytes: &[0; MIN] }
     }
 
-    /// Check if an [`OctetString`] is empty.
+    /// Returns the number of bytes contained in the [`OctetString`].
+    #[inline]
+    pub const fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
+    /// Checks if the [`OctetString`] is empty.
     ///
     /// An [`OctetString`] is considered empty if it
     /// contains no octets.
@@ -76,8 +88,9 @@ impl<'a, const MIN: usize, const MAX: usize> OctetString<'a, MIN, MAX> {
         self.bytes.is_empty()
     }
 
+    /// Creates a new [`OctetString`] from &[[`u8`]].
     pub const fn new(bytes: &'a [u8]) -> Result<Self, Error> {
-        Self::_ASSERT_MIN_LESS_THAN_OR_EQUAL_TO_MAX;
+        Self::_ASSERT_VALID;
 
         if bytes.len() > MAX {
             return Err(Error::TooManyBytes {
@@ -96,16 +109,16 @@ impl<'a, const MIN: usize, const MAX: usize> OctetString<'a, MIN, MAX> {
         Ok(Self { bytes })
     }
 
-    /// Convert an [`OctetString`] to a &[`str`].
-    #[inline]
-    pub fn to_str(&self) -> Result<&str, core::str::Utf8Error> {
-        core::str::from_utf8(self.bytes)
-    }
-
-    /// Get the bytes of an [`OctetString`].
+    /// Returns the bytes of the [`OctetString`].
     #[inline]
     pub const fn bytes(&self) -> &[u8] {
         self.bytes
+    }
+
+    /// Interprets the [`OctetString`] as &[`str`].
+    #[inline]
+    pub fn to_str(&self) -> Result<&str, core::str::Utf8Error> {
+        core::str::from_utf8(self.bytes)
     }
 }
 
@@ -130,6 +143,26 @@ impl<const MIN: usize, const MAX: usize> core::fmt::Display for OctetString<'_, 
     }
 }
 
+impl<const MIN: usize, const MAX: usize> core::convert::AsRef<[u8]> for OctetString<'_, MIN, MAX> {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> core::borrow::Borrow<[u8]> for OctetString<'_, MIN, MAX> {
+    fn borrow(&self) -> &[u8] {
+        self.bytes
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> core::ops::Deref for OctetString<'_, MIN, MAX> {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.bytes
+    }
+}
+
 impl<'a, const MIN: usize, const MAX: usize> From<OctetString<'a, MIN, MAX>>
     for super::any_octet_string::AnyOctetString<'a>
 {
@@ -140,15 +173,15 @@ impl<'a, const MIN: usize, const MAX: usize> From<OctetString<'a, MIN, MAX>>
 
 impl<const MIN: usize, const MAX: usize> Length for OctetString<'_, MIN, MAX> {
     fn length(&self) -> usize {
-        self.bytes.len()
+        self.len()
     }
 }
 
 impl<const MIN: usize, const MAX: usize> Encode for OctetString<'_, MIN, MAX> {
     fn encode(&self, dst: &mut [u8]) -> usize {
-        _ = &mut dst[..self.bytes.len()].copy_from_slice(self.bytes);
+        _ = &mut dst[..self.len()].copy_from_slice(self.bytes);
 
-        self.bytes.len()
+        self.len()
     }
 }
 
