@@ -32,8 +32,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
         // short_message will be overridden by `short_message` of the encoding builder.
         .short_message(OctetString::from_str("Hi, I am a short message.")?)
         .build()
-        .encode()
-        .short_message(message)
+        .encode(message)
         .gsm7bit_unpacked()
         .fallback(Ucs2::new())
         .build()?;

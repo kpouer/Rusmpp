@@ -17,24 +17,19 @@ pub struct EncodedSubmitSmBuilder<'a, E> {
     encoder: E,
 }
 
-impl<E> EncodedSubmitSmBuilder<'static, E> {
-    /// Creates a new [`EncodedSubmitSmBuilder`].
-    const fn new(sm: SubmitSm, encoder: E) -> EncodedSubmitSmBuilder<'static, E> {
-        Self {
-            short_message: "",
-            sm,
-            encoder,
-        }
-    }
-}
+impl<E> EncodedSubmitSmBuilder<'static, E> {}
 
 impl<'a, E> EncodedSubmitSmBuilder<'a, E> {
-    /// Sets the short message.
-    pub fn short_message<'b>(self, short_message: &'b str) -> EncodedSubmitSmBuilder<'b, E> {
-        EncodedSubmitSmBuilder {
+    /// Creates a new [`EncodedSubmitSmBuilder`].
+    const fn new(
+        short_message: &'a str,
+        sm: SubmitSm,
+        encoder: E,
+    ) -> EncodedSubmitSmBuilder<'a, E> {
+        Self {
             short_message,
-            sm: self.sm,
-            encoder: self.encoder,
+            sm,
+            encoder,
         }
     }
 
@@ -102,11 +97,11 @@ pub trait EncodedSubmitSmExt {
     ///
     /// - [`SubmitSm::data_coding`] will be overridden by the multipart builder to match the encoder.
     /// - [`SubmitSm::short_message`] will be overridden by `short_message` of the multipart builder.
-    fn encode(self) -> EncodedSubmitSmBuilder<'static, Gsm7BitUnpacked>;
+    fn encode<'a>(self, short_message: &'a str) -> EncodedSubmitSmBuilder<'a, Gsm7BitUnpacked>;
 }
 
 impl EncodedSubmitSmExt for SubmitSm {
-    fn encode(self) -> EncodedSubmitSmBuilder<'static, Gsm7BitUnpacked> {
-        EncodedSubmitSmBuilder::new(self, Gsm7BitUnpacked::new())
+    fn encode<'a>(self, short_message: &'a str) -> EncodedSubmitSmBuilder<'a, Gsm7BitUnpacked> {
+        EncodedSubmitSmBuilder::new(short_message, self, Gsm7BitUnpacked::new())
     }
 }
