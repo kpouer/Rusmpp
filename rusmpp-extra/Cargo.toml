@@ -17,16 +17,16 @@ ucs2 = { version = "0.3.3", default-features = false, optional = true }
 encoding_rs = { version = "0.8.35", default-features = false, optional = true }
 
 [features]
-default = ["concatenation", "codecs", "alloc"]
+default = ["concatenation", "encoding", "alloc"]
 
 # Enables the `alloc` crate.
 alloc = ["rusmpp-core/alloc"]
 
 # Enables concatenation support.
-concatenation = ["codecs"]
+concatenation = ["encoding"]
 
 # Enables encoding/decoding support.
-codecs = ["dep:ucs2", "dep:encoding_rs"]
+encoding = ["dep:ucs2", "dep:encoding_rs"]
 
 [package.metadata.docs.rs]
 all-features = true

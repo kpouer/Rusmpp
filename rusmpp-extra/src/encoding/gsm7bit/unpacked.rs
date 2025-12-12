@@ -1,6 +1,6 @@
 use rusmpp_core::values::DataCoding;
 
-use crate::codecs::gsm7bit::alphabet::Gsm7BitAlphabet;
+use crate::encoding::gsm7bit::alphabet::Gsm7BitAlphabet;
 
 /// GSM 7-bit unpacked codec.
 #[non_exhaustive]
@@ -66,16 +66,16 @@ mod impl_owned {
     use alloc::vec::Vec;
 
     use crate::{
-        codecs::{
+        concatenation::{
+            MAX_PARTS,
+            owned::{Concatenation, Concatenator},
+        },
+        encoding::{
             gsm7bit::{
                 alphabet::ESCAPE_CHARACTER,
                 errors::{Gsm7BitConcatenateError, Gsm7BitEncodeError},
             },
             owned::Encoder,
-        },
-        concatenation::{
-            MAX_PARTS,
-            owned::{Concatenation, Concatenator},
         },
     };
 

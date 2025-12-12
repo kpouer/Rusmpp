@@ -12,11 +12,11 @@ use rusmpp_core::{
     values::{Npi, Ton},
 };
 use rusmpp_extra::{
-    codecs::{
+    concatenation::owned::SubmitSmMultipartExt,
+    encoding::{
         gsm7bit::{Gsm7BitAlphabet, Gsm7BitUnpacked},
         ucs2::Ucs2,
     },
-    concatenation::owned::SubmitSmMultipartExt,
 };
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {

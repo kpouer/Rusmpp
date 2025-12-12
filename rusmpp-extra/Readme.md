@@ -13,7 +13,7 @@ Extra components for [Rusmpp-Core](https://crates.io/crates/rusmpp-core).
 
 - `alloc`:  Enables the `alloc` crate.
 - `concatenation`: Enables concatenation support.
-- `codecs`: Enables encoding/decoding support.
+- `encoding`: Enables encoding/decoding support.
 
 ## License
 

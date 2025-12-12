@@ -1,14 +1,14 @@
 use crate::{
-    codecs::{
+    concatenation::{
+        MAX_PARTS,
+        owned::{Concatenation, Concatenator},
+    },
+    encoding::{
         gsm7bit::{
             errors::{Gsm7BitConcatenateError, Gsm7BitEncodeError},
             unpacked::Gsm7BitUnpacked,
         },
         owned::Encoder,
-    },
-    concatenation::{
-        MAX_PARTS,
-        owned::{Concatenation, Concatenator},
     },
 };
 

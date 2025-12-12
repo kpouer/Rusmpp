@@ -1,11 +1,11 @@
 use crate::{
-    codecs::{
-        owned::Encoder,
-        ucs2::{Ucs2, Ucs2ConcatenateError, Ucs2EncodeError},
-    },
     concatenation::{
         MAX_PARTS,
         owned::{Concatenation, Concatenator},
+    },
+    encoding::{
+        owned::Encoder,
+        ucs2::{Ucs2, Ucs2ConcatenateError, Ucs2EncodeError},
     },
 };
 

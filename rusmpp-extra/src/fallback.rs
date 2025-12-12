@@ -1,5 +1,6 @@
 //! Fallback behavior for encoding/decoding and concatenation.
 
+/// Fallback error combining two errors.
 #[derive(Debug, thiserror::Error)]
 #[error("Both operations failed: {first}, {second}")]
 pub struct FallbackError<T, U> {

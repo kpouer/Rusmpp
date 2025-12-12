@@ -1,7 +1,7 @@
 use rusmpp_core::values::DataCoding;
 
 use crate::{
-    codecs::owned::Encoder,
+    encoding::owned::Encoder,
     fallback::{Fallback, FallbackError},
 };
 

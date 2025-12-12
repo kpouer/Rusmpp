@@ -52,11 +52,11 @@ mod impl_owned {
     use alloc::vec::Vec;
 
     use crate::{
-        codecs::owned::Encoder,
         concatenation::{
             MAX_PARTS,
             owned::{Concatenation, Concatenator},
         },
+        encoding::owned::Encoder,
     };
 
     use super::*;

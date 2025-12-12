@@ -9,7 +9,7 @@
 //!
 //! - `alloc`:  Enables the `alloc` crate.
 //! - `concatenation`: Enables concatenation support.
-//! - `codecs`: Enables encoding/decoding support.
+//! - `encoding`: Enables encoding/decoding support.
 
 #[cfg(any(test, feature = "alloc"))]
 extern crate alloc;
@@ -18,8 +18,8 @@ extern crate alloc;
 #[cfg_attr(docsrs, doc(cfg(feature = "concatenation")))]
 pub mod concatenation;
 
-#[cfg(feature = "codecs")]
-#[cfg_attr(docsrs, doc(cfg(feature = "codecs")))]
-pub mod codecs;
+#[cfg(feature = "encoding")]
+#[cfg_attr(docsrs, doc(cfg(feature = "encoding")))]
+pub mod encoding;
 
 pub mod fallback;

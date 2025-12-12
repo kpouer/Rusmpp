@@ -7,12 +7,12 @@ use rusmpp_core::{
 };
 
 use crate::{
-    codecs::{gsm7bit::Gsm7BitUnpacked, latin1::Latin1, ucs2::Ucs2},
     concatenation::{
         MAX_PARTS, MIN_PARTS,
         errors::MultipartError,
         owned::{Concatenation, Concatenator},
     },
+    encoding::{gsm7bit::Gsm7BitUnpacked, latin1::Latin1, ucs2::Ucs2},
     fallback::Fallback,
 };
 

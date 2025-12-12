@@ -1,7 +1,7 @@
 use rusmpp_core::{pdus::owned::SubmitSm, types::owned::OctetString};
 
 use crate::{
-    codecs::{
+    encoding::{
         errors::EncodeError, gsm7bit::Gsm7BitUnpacked, latin1::Latin1, owned::Encoder, ucs2::Ucs2,
     },
     fallback::Fallback,

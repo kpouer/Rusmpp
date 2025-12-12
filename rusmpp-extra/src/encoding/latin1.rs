@@ -1,3 +1,5 @@
+//! Latin1 encoding/decoding support.
+
 use rusmpp_core::values::DataCoding;
 
 mod errors;
@@ -32,11 +34,11 @@ mod impl_owned {
     use alloc::vec::Vec;
 
     use crate::{
-        codecs::owned::Encoder,
         concatenation::{
             MAX_PARTS,
             owned::{Concatenation, Concatenator},
         },
+        encoding::owned::Encoder,
     };
 
     use super::*;

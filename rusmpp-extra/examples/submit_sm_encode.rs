@@ -11,7 +11,7 @@ use rusmpp_core::{
     types::owned::{COctetString, OctetString},
     values::{DataCoding, Npi, Ton},
 };
-use rusmpp_extra::codecs::{owned::EncodedSubmitSmExt, ucs2::Ucs2};
+use rusmpp_extra::encoding::{owned::EncodedSubmitSmExt, ucs2::Ucs2};
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
     // c-spell: disable

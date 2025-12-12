@@ -1,9 +1,9 @@
 use crate::{
-    codecs::{
+    concatenation::{MAX_PARTS, owned::Concatenator},
+    encoding::{
         latin1::{Latin1, Latin1ConcatenateError, Latin1EncodeError},
         owned::Encoder,
     },
-    concatenation::{MAX_PARTS, owned::Concatenator},
 };
 
 mod encode {
