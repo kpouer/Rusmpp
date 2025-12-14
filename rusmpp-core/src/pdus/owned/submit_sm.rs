@@ -141,7 +141,7 @@ impl SubmitSm {
 
         let sm_length = short_message.length() as u8;
 
-        let mut submit_sm = Self {
+        Self {
             service_type,
             source_addr_ton,
             source_addr_npi,
@@ -161,11 +161,58 @@ impl SubmitSm {
             sm_length,
             short_message,
             tlvs,
-        };
+        }
+    }
 
-        submit_sm.clear_short_message_if_message_payload_exists();
+    /// Creates a new [`SubmitSm`] instance, returning `None` if both `short_message` and
+    /// `message_payload` TLV are set
+    #[allow(clippy::too_many_arguments)]
+    pub fn try_new(
+        service_type: ServiceType,
+        source_addr_ton: Ton,
+        source_addr_npi: Npi,
+        source_addr: COctetString<1, 21>,
+        dest_addr_ton: Ton,
+        dest_addr_npi: Npi,
+        destination_addr: COctetString<1, 21>,
+        esm_class: EsmClass,
+        protocol_id: u8,
+        priority_flag: PriorityFlag,
+        schedule_delivery_time: EmptyOrFullCOctetString<17>,
+        validity_period: EmptyOrFullCOctetString<17>,
+        registered_delivery: RegisteredDelivery,
+        replace_if_present_flag: ReplaceIfPresentFlag,
+        data_coding: DataCoding,
+        sm_default_msg_id: u8,
+        short_message: OctetString<0, 255>,
+        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
+    ) -> Option<Self> {
+        let submit_sm = Self::new(
+            service_type,
+            source_addr_ton,
+            source_addr_npi,
+            source_addr,
+            dest_addr_ton,
+            dest_addr_npi,
+            destination_addr,
+            esm_class,
+            protocol_id,
+            priority_flag,
+            schedule_delivery_time,
+            validity_period,
+            registered_delivery,
+            replace_if_present_flag,
+            data_coding,
+            sm_default_msg_id,
+            short_message,
+            tlvs,
+        );
 
-        submit_sm
+        if submit_sm.short_message_exists() && submit_sm.message_payload_exists() {
+            return None;
+        }
+
+        Some(submit_sm)
     }
 
     pub fn sm_length(&self) -> u8 {
@@ -176,25 +223,12 @@ impl SubmitSm {
         &self.short_message
     }
 
-    /// Sets the short message and short message length.
-    /// Updates the short message and short message length accordingly.
-    /// Has no effect if the message payload is set.
-    /// Returns true if the short message and short message length were set.
-    pub fn set_short_message(&mut self, short_message: OctetString<0, 255>) -> bool {
-        self.short_message = short_message;
-        self.sm_length = self.short_message.length() as u8;
-
-        !self.clear_short_message_if_message_payload_exists()
-    }
-
     pub fn tlvs(&self) -> &[Tlv] {
         &self.tlvs
     }
 
     pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>) {
         self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
-
-        self.clear_short_message_if_message_payload_exists();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -203,26 +237,6 @@ impl SubmitSm {
 
     pub fn push_tlv(&mut self, tlv: impl Into<MessageSubmissionRequestTlvValue>) {
         self.tlvs.push(Tlv::from(tlv.into()));
-
-        self.clear_short_message_if_message_payload_exists();
-    }
-
-    /// Clears the short message and short message length if the message payload is set.
-    /// Returns true if the short message and short message length were cleared.
-    fn clear_short_message_if_message_payload_exists(&mut self) -> bool {
-        let message_payload_exists = self
-            .tlvs
-            .iter()
-            .any(|value| matches!(value.tag(), TlvTag::MessagePayload));
-
-        if message_payload_exists {
-            self.short_message = OctetString::empty();
-            self.sm_length = 0;
-
-            return true;
-        };
-
-        false
     }
 
     pub fn builder() -> SubmitSmBuilder {
@@ -241,12 +255,119 @@ impl SubmitSm {
         self
     }
 
-    /// Sets the [`SubmitSm::short_message`] and [`SubmitSm::sm_length`](SubmitSm::sm_length).
+    /// Sets the `short_message` and `sm_length`.
     ///
-    /// See [`SubmitSm::set_short_message`] for details.
+    /// See [`Self::set_short_message`] for details.
     pub fn with_short_message(mut self, short_message: OctetString<0, 255>) -> Self {
         self.set_short_message(short_message);
         self
+    }
+
+    /// Attempts to set the `short_message` and `sm_length`, returning `Some(Self)` if successful.
+    ///
+    /// See [`Self::try_set_short_message`] for details.
+    pub fn with_try_short_message(mut self, short_message: OctetString<0, 255>) -> Option<Self> {
+        if self.try_set_short_message(short_message) {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
+    // TODO: macros
+
+    /// Sets the `short_message` and `sm_length`.
+    ///
+    /// # Note
+    ///
+    /// `short_message` is superceded by [`MessageSubmissionRequestTlvValue::MessagePayload`] and should only be used if
+    /// [`MessageSubmissionRequestTlvValue::MessagePayload`] is not present.
+    pub fn set_short_message(&mut self, short_message: OctetString<0, 255>) {
+        self.short_message = short_message;
+        self.sm_length = self.short_message.length() as u8;
+    }
+
+    /// Attempts to set the `short_message` and `sm_length` and returns `true` if successful.
+    ///
+    /// See [`SubmitSm::set_short_message`] for details.
+    pub fn try_set_short_message(&mut self, short_message: OctetString<0, 255>) -> bool {
+        if !self.message_payload_exists() {
+            self.set_short_message(short_message);
+
+            return true;
+        }
+
+        false
+    }
+
+    /// Clears the `short_message` and sets the `sm_length` to `0`.
+    pub fn clear_short_message(&mut self) {
+        self.short_message = OctetString::empty();
+        self.sm_length = 0;
+    }
+
+    /// Attempts to set the TLVs and returns `true` if successful.
+    ///
+    /// # Note
+    ///
+    /// If one of the TLVs is [`MessageSubmissionRequestTlvValue::MessagePayload`], it will not be set
+    /// if the `short_message` is set, as [`MessageSubmissionRequestTlvValue::MessagePayload`] supersedes the `short_message`.
+    pub fn try_set_tlvs(
+        &mut self,
+        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
+    ) -> bool {
+        let tlvs: alloc::vec::Vec<Tlv> = tlvs.into_iter().map(Into::into).map(From::from).collect();
+
+        if tlvs
+            .iter()
+            .any(|value| matches!(value.tag(), TlvTag::MessagePayload))
+        {
+            if !self.short_message_exists() {
+                self.tlvs = tlvs;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        self.tlvs = tlvs;
+
+        true
+    }
+
+    /// Attempts to push a [`MessageSubmissionRequestTlvValue`] and returns `true` if successful.
+    ///
+    /// If the TLV is [`MessageSubmissionRequestTlvValue::MessagePayload`], it will not be pushed
+    /// if the `short_message` is set, as [`MessageSubmissionRequestTlvValue::MessagePayload`] supersedes the `short_message`.
+    pub fn try_push_tlv(&mut self, tlv: impl Into<MessageSubmissionRequestTlvValue>) -> bool {
+        let tlv = tlv.into();
+
+        if matches!(tlv, MessageSubmissionRequestTlvValue::MessagePayload(_)) {
+            if !self.short_message_exists() {
+                self.tlvs.push(Tlv::from(tlv));
+
+                return true;
+            }
+
+            return false;
+        }
+
+        self.tlvs.push(Tlv::from(tlv));
+
+        true
+    }
+
+    /// Checks if [`TlvValue::MessagePayload`](crate::tlvs::owned::TlvValue::MessagePayload) exists.
+    pub fn message_payload_exists(&self) -> bool {
+        self.tlvs
+            .iter()
+            .any(|value| matches!(value.tag(), TlvTag::MessagePayload))
+    }
+
+    /// Checks if the `short_message` is set.
+    pub fn short_message_exists(&self) -> bool {
+        !self.short_message.is_empty()
     }
 }
 
@@ -378,11 +499,43 @@ impl SubmitSmBuilder {
     pub fn build(self) -> SubmitSm {
         self.inner
     }
+
+    // TODO: macros
+
+    pub fn try_short_message(mut self, short_message: OctetString<0, 255>) -> Option<Self> {
+        if self.inner.try_set_short_message(short_message) {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_tlvs(
+        mut self,
+        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
+    ) -> Option<Self> {
+        if self.inner.try_set_tlvs(tlvs) {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_push_tlv(
+        mut self,
+        tlv: impl Into<MessageSubmissionRequestTlvValue>,
+    ) -> Option<Self> {
+        if self.inner.try_push_tlv(tlv) {
+            Some(self)
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::{str::FromStr, vec::Vec};
 
     use crate::{tests::TestInstance, types::owned::AnyOctetString};
 
@@ -477,7 +630,6 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<SubmitSm>();
     }
 
@@ -494,82 +646,166 @@ mod tests {
     }
 
     #[test]
-    fn short_message_override() {
-        let short_message_1 = OctetString::from_static_slice(b"Short Message 101").unwrap();
-        let short_message_2 = OctetString::from_static_slice(b"Short Message 2").unwrap();
+    fn try_new() {
+        // Return None if both short_message and message_payload are set
+        let submit_sm = SubmitSm::try_new(
+            ServiceType::default(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            EsmClass::default(),
+            0,
+            PriorityFlag::default(),
+            EmptyOrFullCOctetString::empty(),
+            EmptyOrFullCOctetString::empty(),
+            RegisteredDelivery::default(),
+            ReplaceIfPresentFlag::default(),
+            DataCoding::default(),
+            0,
+            OctetString::from_static_slice(b"Short Message").unwrap(),
+            alloc::vec![MessageSubmissionRequestTlvValue::MessagePayload(
+                MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
+            )],
+        );
 
-        let submit_sm = SubmitSm::builder()
-            .short_message(short_message_1)
-            .short_message(short_message_2.clone())
-            .build();
+        assert!(submit_sm.is_none());
 
-        assert_eq!(submit_sm.short_message(), &short_message_2);
-        assert_eq!(submit_sm.sm_length(), short_message_2.length() as u8);
+        // Return Some if only short_message is set
+        let submit_sm = SubmitSm::try_new(
+            ServiceType::default(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            EsmClass::default(),
+            0,
+            PriorityFlag::default(),
+            EmptyOrFullCOctetString::empty(),
+            EmptyOrFullCOctetString::empty(),
+            RegisteredDelivery::default(),
+            ReplaceIfPresentFlag::default(),
+            DataCoding::default(),
+            0,
+            OctetString::from_static_slice(b"Short Message").unwrap(),
+            Vec::<MessageSubmissionRequestTlvValue>::new(),
+        );
+
+        assert!(submit_sm.is_some());
+
+        // Return Some if only message_payload is set
+        let submit_sm = SubmitSm::try_new(
+            ServiceType::default(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            Ton::Unknown,
+            Npi::Unknown,
+            COctetString::empty(),
+            EsmClass::default(),
+            0,
+            PriorityFlag::default(),
+            EmptyOrFullCOctetString::empty(),
+            EmptyOrFullCOctetString::empty(),
+            RegisteredDelivery::default(),
+            ReplaceIfPresentFlag::default(),
+            DataCoding::default(),
+            0,
+            OctetString::default(),
+            alloc::vec![MessageSubmissionRequestTlvValue::MessagePayload(
+                MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
+            )],
+        );
+
+        assert!(submit_sm.is_some());
     }
 
     #[test]
-    fn message_payload_suppresses_short_message() {
-        let short_message = OctetString::from_static_slice(b"Short Message").unwrap();
-        let message_payload =
-            MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload"));
-
-        // Using push_tlv
-        let submit_sm = SubmitSm::builder()
-            .short_message(short_message.clone())
+    fn try_set_short_message() {
+        let mut submit_sm = SubmitSm::builder()
             .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
+                MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
             ))
             .build();
 
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
+        // Return false if message_payload TLV is set
+        let result = submit_sm
+            .try_set_short_message(OctetString::from_static_slice(b"Short Message").unwrap());
 
-        // Using tlvs
-        let submit_sm = SubmitSm::builder()
-            .short_message(short_message.clone())
-            .tlvs(alloc::vec![
-                MessageSubmissionRequestTlvValue::MessagePayload(message_payload.clone(),)
-            ])
+        assert!(!result);
+
+        // Return true if message_payload TLV is not set
+        submit_sm.clear_tlvs();
+
+        let result = submit_sm
+            .try_set_short_message(OctetString::from_static_slice(b"Short Message").unwrap());
+
+        assert!(result);
+    }
+
+    #[test]
+    fn try_set_tlvs() {
+        let mut submit_sm = SubmitSm::builder()
+            .short_message(OctetString::from_static_slice(b"Short Message").unwrap())
             .build();
 
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
+        // Return false if trying to set message_payload TLV when short_message is set
+        let result = submit_sm.try_set_tlvs(alloc::vec![
+            MessageSubmissionRequestTlvValue::MessagePayload(MessagePayload::new(
+                AnyOctetString::from_static_slice(b"Message Payload"),
+            )),
+        ]);
 
-        // Even setting the short message after the message payload should not set the short message
-        // Using push_tlv
-        let submit_sm = SubmitSm::builder()
-            .short_message(short_message.clone())
-            .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
-            ))
-            .short_message(short_message.clone())
+        assert!(!result);
+
+        // Return true if message_payload TLV is not being set
+        let result = submit_sm.try_set_tlvs(alloc::vec![
+            MessageSubmissionRequestTlvValue::UserResponseCode(5),
+        ]);
+
+        assert!(result);
+
+        // Return true if short_message is not set
+        submit_sm.clear_short_message();
+
+        let result = submit_sm.try_set_tlvs(alloc::vec![
+            MessageSubmissionRequestTlvValue::MessagePayload(MessagePayload::new(
+                AnyOctetString::from_static_slice(b"Message Payload"),
+            )),
+        ]);
+
+        assert!(result);
+    }
+
+    #[test]
+    fn try_push_tlv() {
+        let mut submit_sm = SubmitSm::builder()
+            .short_message(OctetString::from_static_slice(b"Short Message").unwrap())
             .build();
 
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
+        // Return false if trying to push message_payload TLV when short_message is set
+        let result = submit_sm.try_push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
+            MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
+        ));
 
-        // Using tlvs
-        let submit_sm = SubmitSm::builder()
-            .short_message(short_message.clone())
-            .tlvs(alloc::vec![
-                MessageSubmissionRequestTlvValue::MessagePayload(message_payload.clone(),)
-            ])
-            .short_message(short_message.clone())
-            .build();
+        assert!(!result);
 
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
+        // Return true if message_payload TLV is not being pushed
+        let result = submit_sm.try_push_tlv(MessageSubmissionRequestTlvValue::UserResponseCode(5));
 
-        // Removing the message payload and then setting the short message should set the short message
-        let submit_sm = SubmitSm::builder()
-            .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
-            ))
-            .clear_tlvs()
-            .short_message(short_message.clone())
-            .build();
+        assert!(result);
 
-        assert_eq!(submit_sm.short_message(), &short_message);
-        assert_eq!(submit_sm.sm_length(), short_message.length() as u8);
+        // Return true if short_message is not set
+        submit_sm.clear_short_message();
+
+        let result = submit_sm.try_push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
+            MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload")),
+        ));
+
+        assert!(result);
     }
 }
