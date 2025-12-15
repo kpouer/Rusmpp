@@ -36,8 +36,8 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        crate::tests::borrowed::encode_decode_test_instances::<Npi>();
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<Npi>();
+        crate::tests::borrowed::encode_decode_test_instances::<Npi>();
     }
 }

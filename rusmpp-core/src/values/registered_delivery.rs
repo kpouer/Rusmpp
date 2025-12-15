@@ -131,15 +131,12 @@ mod tests {
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<RegisteredDelivery>();
         crate::tests::borrowed::encode_decode_test_instances::<RegisteredDelivery>();
-
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<MCDeliveryReceipt>();
         crate::tests::borrowed::encode_decode_test_instances::<MCDeliveryReceipt>();
-
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<SmeOriginatedAcknowledgement>();
         crate::tests::borrowed::encode_decode_test_instances::<SmeOriginatedAcknowledgement>();
-
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<IntermediateNotification>();
         crate::tests::borrowed::encode_decode_test_instances::<IntermediateNotification>();

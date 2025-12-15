@@ -42,8 +42,8 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        crate::tests::borrowed::encode_decode_test_instances::<InterfaceVersion>();
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<InterfaceVersion>();
+        crate::tests::borrowed::encode_decode_test_instances::<InterfaceVersion>();
     }
 }

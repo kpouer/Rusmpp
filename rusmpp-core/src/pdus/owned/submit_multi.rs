@@ -3,10 +3,7 @@ use rusmpp_macros::Rusmpp;
 use crate::{
     encode::Length,
     pdus::owned::Pdu,
-    tlvs::{
-        TlvTag,
-        owned::{MessageSubmissionRequestTlvValue, Tlv},
-    },
+    tlvs::owned::{MessageSubmissionRequestTlvValue, Tlv},
     types::owned::{COctetString, EmptyOrFullCOctetString, OctetString},
     values::{owned::*, *},
 };
@@ -125,7 +122,7 @@ impl SubmitMulti {
 
         let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
 
-        let mut submit_multi = Self {
+        Self {
             service_type,
             source_addr_ton,
             source_addr_npi,
@@ -144,11 +141,7 @@ impl SubmitMulti {
             sm_length,
             short_message,
             tlvs,
-        };
-
-        submit_multi.clear_short_message_if_message_payload_exists();
-
-        submit_multi
+        }
     }
 
     pub const fn number_of_dests(&self) -> u8 {
@@ -182,15 +175,15 @@ impl SubmitMulti {
         &self.short_message
     }
 
-    /// Sets the short message and short message length.
-    /// Updates the short message and short message length accordingly.
-    /// Has no effect if the message payload is set.
-    /// Returns true if the short message and short message length were set.
-    pub fn set_short_message(&mut self, short_message: OctetString<0, 255>) -> bool {
+    /// Sets the `short_message` and `sm_length`.
+    ///
+    /// # Note
+    ///
+    /// `short_message` is superceded by [`TlvValue::MessagePayload`](crate::tlvs::owned::TlvValue::MessagePayload) and should only be used if
+    /// [`TlvValue::MessagePayload`](crate::tlvs::owned::TlvValue::MessagePayload) is not present.
+    pub fn set_short_message(&mut self, short_message: OctetString<0, 255>) {
         self.short_message = short_message;
         self.sm_length = self.short_message.length() as u8;
-
-        !self.clear_short_message_if_message_payload_exists()
     }
 
     pub fn tlvs(&self) -> &[Tlv] {
@@ -199,8 +192,6 @@ impl SubmitMulti {
 
     pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>) {
         self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
-
-        self.clear_short_message_if_message_payload_exists();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -209,26 +200,6 @@ impl SubmitMulti {
 
     pub fn push_tlv(&mut self, tlv: impl Into<MessageSubmissionRequestTlvValue>) {
         self.tlvs.push(Tlv::from(tlv.into()));
-
-        self.clear_short_message_if_message_payload_exists();
-    }
-
-    /// Clears the short message and short message length if the message payload is set.
-    /// Returns true if the short message and short message length were cleared.
-    fn clear_short_message_if_message_payload_exists(&mut self) -> bool {
-        let message_payload_exists = self
-            .tlvs
-            .iter()
-            .any(|value| matches!(value.tag(), TlvTag::MessagePayload));
-
-        if message_payload_exists {
-            self.short_message = OctetString::empty();
-            self.sm_length = 0;
-
-            return true;
-        };
-
-        false
     }
 
     pub fn builder() -> SubmitMultiBuilder {
@@ -423,7 +394,6 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<SubmitMulti>();
     }
 
@@ -432,86 +402,6 @@ mod tests {
         let short_message = OctetString::from_static_slice(b"Short Message").unwrap();
 
         let submit_sm = SubmitMulti::builder()
-            .short_message(short_message.clone())
-            .build();
-
-        assert_eq!(submit_sm.short_message(), &short_message);
-        assert_eq!(submit_sm.sm_length(), short_message.length() as u8);
-    }
-
-    #[test]
-    fn short_message_override() {
-        let short_message_1 = OctetString::from_static_slice(b"Short Message 101").unwrap();
-        let short_message_2 = OctetString::from_static_slice(b"Short Message 2").unwrap();
-
-        let submit_sm = SubmitMulti::builder()
-            .short_message(short_message_1)
-            .short_message(short_message_2.clone())
-            .build();
-
-        assert_eq!(submit_sm.short_message(), &short_message_2);
-        assert_eq!(submit_sm.sm_length(), short_message_2.length() as u8);
-    }
-
-    #[test]
-    fn message_payload_suppresses_short_message() {
-        let short_message = OctetString::from_static_slice(b"Short Message").unwrap();
-        let message_payload =
-            MessagePayload::new(AnyOctetString::from_static_slice(b"Message Payload"));
-
-        // Using push_tlv
-        let submit_sm = SubmitMulti::builder()
-            .short_message(short_message.clone())
-            .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
-            ))
-            .build();
-
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
-
-        // Using tlvs
-        let submit_sm = SubmitMulti::builder()
-            .short_message(short_message.clone())
-            .tlvs(alloc::vec![
-                MessageSubmissionRequestTlvValue::MessagePayload(message_payload.clone(),)
-            ])
-            .build();
-
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
-
-        // Even setting the short message after the message payload should not set the short message
-        // Using push_tlv
-        let submit_sm = SubmitMulti::builder()
-            .short_message(short_message.clone())
-            .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
-            ))
-            .short_message(short_message.clone())
-            .build();
-
-        assert_eq!(submit_sm.short_message(), &OctetString::empty());
-        assert_eq!(submit_sm.sm_length(), 0);
-
-        // Using tlvs
-        let submit_multi = SubmitMulti::builder()
-            .short_message(short_message.clone())
-            .tlvs(alloc::vec![
-                MessageSubmissionRequestTlvValue::MessagePayload(message_payload.clone(),)
-            ])
-            .short_message(short_message.clone())
-            .build();
-
-        assert_eq!(submit_multi.short_message(), &OctetString::empty());
-        assert_eq!(submit_multi.sm_length(), 0);
-
-        // Removing the message payload and then setting the short message should set the short message
-        let submit_sm = SubmitMulti::builder()
-            .push_tlv(MessageSubmissionRequestTlvValue::MessagePayload(
-                message_payload.clone(),
-            ))
-            .clear_tlvs()
             .short_message(short_message.clone())
             .build();
 
