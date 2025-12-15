@@ -90,7 +90,7 @@ async def main():
             data_coding=DataCoding.Ucs2(),
             short_message=b"Hello, World!",
             tlvs=[
-                # The message payload will override the short message
+                # The message payload will supersede the short_message field and should only be used if short_message is empty
                 MessageSubmissionRequestTlvValue.MessagePayload(
                     MessagePayload(b"Big Message" * 10)
                 )

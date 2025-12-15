@@ -1,5 +1,10 @@
 use humantime::format_duration;
 use pyo3::{create_exception, exceptions::PyException, PyErr};
+use rusmpp::extra::{
+    concatenation::errors::MultipartError, encoding::errors::EncodeError as REncodeError,
+};
+
+use crate::encoder::EncodeError;
 
 create_exception!(
     exceptions,
@@ -71,6 +76,20 @@ create_exception!(
     "The client created an invalid `SMPP` value."
 );
 
+create_exception!(
+    exceptions,
+    ShortMessageEncodeException,
+    RusmppycException,
+    "Failed to encode `short_message`."
+);
+
+create_exception!(
+    exceptions,
+    ShortMessageMultipartException,
+    RusmppycException,
+    "Failed to create `short_message` parts."
+);
+
 /// Errors that can occur while calling Rusmppyc functions.
 ///
 /// These errors are not send through the event stream, but are raised directly when calling the functions.
@@ -101,6 +120,10 @@ pub enum Exception {
         /// The error message.
         error: String,
     },
+    /// Failed to encode `short_message`.
+    ShortMessageEncode(String),
+    /// Failed to create `short_message` parts.
+    ShortMessageMultipart(String),
     /// Other error type.
     ///
     /// Rusmppc error type is non-exhaustive and contains all errors returned by the library including the ones returned by the event stream.
@@ -137,6 +160,12 @@ impl std::fmt::Display for Exception {
             ),
             Exception::Value { name, error } => {
                 write!(f, "Invalid SMPP value: name: {}, error: {}", name, error)
+            }
+            Exception::ShortMessageEncode(error) => {
+                write!(f, "Failed to encode short_message: {}", error)
+            }
+            Exception::ShortMessageMultipart(error) => {
+                write!(f, "Failed to create short_message parts: {}", error)
             }
             Exception::Other(error) => write!(f, "Other error: {}", error),
         }
@@ -177,6 +206,18 @@ impl From<rusmppc::error::Error> for Exception {
     }
 }
 
+impl From<MultipartError<EncodeError>> for Exception {
+    fn from(error: MultipartError<EncodeError>) -> Self {
+        Exception::ShortMessageMultipart(error.to_string())
+    }
+}
+
+impl From<REncodeError<EncodeError>> for Exception {
+    fn from(error: REncodeError<EncodeError>) -> Self {
+        Exception::ShortMessageEncode(error.to_string())
+    }
+}
+
 impl From<Exception> for PyErr {
     fn from(error: Exception) -> Self {
         match error {
@@ -195,6 +236,12 @@ impl From<Exception> for PyErr {
                 UnsupportedInterfaceVersionException::new_err(error.to_string())
             }
             Exception::Value { .. } => ValueException::new_err(error.to_string()),
+            Exception::ShortMessageEncode(_) => {
+                ShortMessageEncodeException::new_err(error.to_string())
+            }
+            Exception::ShortMessageMultipart(_) => {
+                ShortMessageMultipartException::new_err(error.to_string())
+            }
             Exception::Other(_) => RusmppycException::new_err(error.to_string()),
         }
     }

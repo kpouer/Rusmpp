@@ -570,8 +570,7 @@ impl Client {
             .reference_u8(reference)
             .encoder(encoder)
             .build()
-            // TODO: handle error properly
-            .expect("TODO: remove this. Failed to create multipart")
+            .map_err(Exception::from)?
             .into_iter()
             .map(From::from)
             .collect();
@@ -662,8 +661,7 @@ impl Client {
             .encoder(encoder)
             .build()
             .map(From::from)
-            // TODO: handle error properly
-            .expect("TODO: remove this. Failed to encode message");
+            .map_err(Exception::from)?;
 
         Ok(encoded)
     }

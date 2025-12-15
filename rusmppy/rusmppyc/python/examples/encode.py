@@ -60,24 +60,28 @@ async def main():
             ^{}\[~]|€"""
         # c-spell: enable
 
-        # If the encoded message exceeds 140 bytes, the SubmitSm will not be split into multiple parts automatically.
-        # For this use case, use `submit_sm_multipart` method instead.
-        submit_sm: SubmitSm = client.submit_sm_encode(
-            short_message=short_message,
-            encoder=Encoder.Gsm7BitUnpacked(
-                Gsm7BitUnpacked(alphabet=Gsm7BitAlphabet.default())
-            ),
-            source_addr_ton=Ton.International(),
-            source_addr_npi=Npi.National(),
-            registered_delivery=RegisteredDelivery.request_all(),
-            tlvs=[MessageSubmissionRequestTlvValue.BillingIdentification(b"bytes")],
-        )
+        try:
+            # If the encoded message exceeds 140 bytes, the SubmitSm will not be split into multiple parts automatically.
+            # For this use case, use `submit_sm_multipart` method instead.
+            submit_sm: SubmitSm = client.submit_sm_encode(
+                short_message=short_message,
+                encoder=Encoder.Gsm7BitUnpacked(
+                    Gsm7BitUnpacked(alphabet=Gsm7BitAlphabet.default())
+                ),
+                source_addr_ton=Ton.International(),
+                source_addr_npi=Npi.National(),
+                registered_delivery=RegisteredDelivery.request_all(),
+                tlvs=[MessageSubmissionRequestTlvValue.BillingIdentification(b"bytes")],
+            )
 
-        logging.info(f"Encoded SubmitSm: {submit_sm}")
+            logging.info(f"Encoded SubmitSm: {submit_sm}")
 
-        submit_sm_response: SubmitSmResp = await client.submit_sm(submit_sm)
+            submit_sm_response: SubmitSmResp = await client.submit_sm(submit_sm)
 
-        logging.info(f"SubmitSm response: {submit_sm_response}")
+            logging.info(f"SubmitSm response: {submit_sm_response}")
+
+        except RusmppycException as e:
+            logging.error(f"Failed to submit message: {e}")
 
         await asyncio.sleep(5)
 

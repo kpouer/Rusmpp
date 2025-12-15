@@ -61,6 +61,14 @@ fn rusmppyc(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
         py.get_type::<UnsupportedInterfaceVersionException>(),
     )?;
     m.add("ValueException", py.get_type::<ValueException>())?;
+    m.add(
+        "ShortMessageEncodeException",
+        py.get_type::<ShortMessageEncodeException>(),
+    )?;
+    m.add(
+        "ShortMessageMultipartException",
+        py.get_type::<ShortMessageMultipartException>(),
+    )?;
 
     Ok(())
 }

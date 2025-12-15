@@ -50,20 +50,24 @@ async def main():
 
         await client.bind_transceiver(system_id="test", password="test")
 
-        multipart: list[SubmitSm] = client.submit_sm_multipart(
-            short_message="Hi how are you?" * 20,
-            encoder=Encoder.Ucs2(Ucs2()),
-            registered_delivery=RegisteredDelivery.request_all(),
-        )
+        try:
+            multipart: list[SubmitSm] = client.submit_sm_multipart(
+                short_message="Hi how are you?" * 20,
+                encoder=Encoder.Ucs2(Ucs2()),
+                registered_delivery=RegisteredDelivery.request_all(),
+            )
 
-        logging.info(f"Multipart: {multipart}")
+            logging.info(f"Multipart: {multipart}")
 
-        for i, submit_sm in enumerate(multipart):
-            logging.info(f"Sending part {i + 1} of {len(multipart)}: {submit_sm}")
+            for i, submit_sm in enumerate(multipart):
+                logging.info(f"Sending part {i + 1} of {len(multipart)}: {submit_sm}")
 
-            submit_sm_resp: SubmitSmResp = await client.submit_sm(submit_sm)
+                submit_sm_resp: SubmitSmResp = await client.submit_sm(submit_sm)
 
-            logging.info(f"SubmitSm Response {i + 1}: {submit_sm_resp}")
+                logging.info(f"SubmitSm Response {i + 1}: {submit_sm_resp}")
+
+        except RusmppycException as e:
+            logging.error(f"Failed to send multipart message: {e}")
 
         await asyncio.sleep(5)
 

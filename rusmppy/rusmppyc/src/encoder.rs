@@ -190,28 +190,47 @@ impl From<Latin1> for RLatin1 {
     }
 }
 
+#[derive(Debug)]
+pub struct EncodeError {
+    pub encoder: String,
+    pub error: String,
+}
+
+impl std::fmt::Display for EncodeError {
+    // XXX: do not add a prefix like `Encode error: ...`, otherwise we get `Encode error: Encode error: ...` in the final error message in the exception.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "encoder: {}, error: {}", self.encoder, self.error)
+    }
+}
+
+impl EncodeError {
+    pub const fn new(encoder: String, error: String) -> Self {
+        Self { encoder, error }
+    }
+}
+
 impl rusmpp::extra::encoding::Encoder for Encoder {
-    // TODO: proper error type
-    type Error = String;
+    type Error = EncodeError;
 
     fn encode(&self, message: &str) -> Result<(Vec<u8>, rusmpp::values::DataCoding), Self::Error> {
         match self {
             Encoder::Gsm7BitUnpacked(encoder) => RGsm7BitUnpacked::from(*encoder)
                 .encode(message)
-                .map_err(|e| format!("Gsm7BitUnpacked encode error: {e}")),
+                .map_err(|e| {
+                    EncodeError::new(String::from(stringify!(Gsm7BitUnpacked)), e.to_string())
+                }),
             Encoder::Ucs2(encoder) => RUcs2::from(*encoder)
                 .encode(message)
-                .map_err(|e| format!("Ucs2 encode error: {e}")),
+                .map_err(|e| EncodeError::new(String::from(stringify!(Ucs2)), e.to_string())),
             Encoder::Latin1(encoder) => RLatin1::from(*encoder)
                 .encode(message)
-                .map_err(|e| format!("Latin1 encode error: {e}")),
+                .map_err(|e| EncodeError::new(String::from(stringify!(Latin1)), e.to_string())),
         }
     }
 }
 
 impl rusmpp::extra::concatenation::Concatenator for Encoder {
-    // TODO: proper error type
-    type Error = String;
+    type Error = EncodeError;
 
     fn concatenate(
         &self,
@@ -228,13 +247,15 @@ impl rusmpp::extra::concatenation::Concatenator for Encoder {
         match self {
             Encoder::Gsm7BitUnpacked(encoder) => RGsm7BitUnpacked::from(*encoder)
                 .concatenate(message, max_message_size, part_header_size)
-                .map_err(|e| format!("Gsm7BitUnpacked concatenation error: {e}")),
+                .map_err(|e| {
+                    EncodeError::new(String::from(stringify!(Gsm7BitUnpacked)), e.to_string())
+                }),
             Encoder::Ucs2(encoder) => RUcs2::from(*encoder)
                 .concatenate(message, max_message_size, part_header_size)
-                .map_err(|e| format!("Ucs2 concatenation error: {e}")),
+                .map_err(|e| EncodeError::new(String::from(stringify!(Ucs2)), e.to_string())),
             Encoder::Latin1(encoder) => RLatin1::from(*encoder)
                 .concatenate(message, max_message_size, part_header_size)
-                .map_err(|e| format!("Latin1 concatenation error: {e}")),
+                .map_err(|e| EncodeError::new(String::from(stringify!(Latin1)), e.to_string())),
         }
     }
 }
