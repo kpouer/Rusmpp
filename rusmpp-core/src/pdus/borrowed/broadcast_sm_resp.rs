@@ -24,9 +24,9 @@ pub struct BroadcastSmResp<'a, const N: usize> {
 impl<'a, const N: usize> BroadcastSmResp<'a, N> {
     pub fn new(
         message_id: COctetString<'a, 1, 65>,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastResponseTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<BroadcastResponseTlvValue<'a>, N>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self { message_id, tlvs }
     }
@@ -35,11 +35,8 @@ impl<'a, const N: usize> BroadcastSmResp<'a, N> {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastResponseTlvValue<'a>>, N>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: heapless::vec::Vec<BroadcastResponseTlvValue<'a>, N>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -80,10 +77,7 @@ impl<'a, const N: usize> BroadcastSmRespBuilder<'a, N> {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastResponseTlvValue<'a>>, N>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: heapless::vec::Vec<BroadcastResponseTlvValue<'a>, N>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

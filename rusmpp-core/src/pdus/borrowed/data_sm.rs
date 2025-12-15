@@ -80,9 +80,9 @@ impl<'a, const N: usize> DataSm<'a, N> {
         esm_class: EsmClass,
         registered_delivery: RegisteredDelivery,
         data_coding: DataCoding,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionRequestTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<MessageSubmissionRequestTlvValue<'a>, N>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             service_type,
@@ -103,11 +103,8 @@ impl<'a, const N: usize> DataSm<'a, N> {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionRequestTlvValue<'a>>, N>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: heapless::vec::Vec<MessageSubmissionRequestTlvValue<'a>, N>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -195,7 +192,7 @@ impl<'a, const N: usize> DataSmBuilder<'a, N> {
 
     pub fn tlvs(
         mut self,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionRequestTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<MessageSubmissionRequestTlvValue<'a>, N>,
     ) -> Self {
         self.inner.set_tlvs(tlvs);
         self

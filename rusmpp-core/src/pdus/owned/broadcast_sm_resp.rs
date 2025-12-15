@@ -24,9 +24,9 @@ pub struct BroadcastSmResp {
 impl BroadcastSmResp {
     pub fn new(
         message_id: COctetString<1, 65>,
-        tlvs: alloc::vec::Vec<impl Into<BroadcastResponseTlvValue>>,
+        tlvs: alloc::vec::Vec<BroadcastResponseTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self { message_id, tlvs }
     }
@@ -35,8 +35,8 @@ impl BroadcastSmResp {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<BroadcastResponseTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<BroadcastResponseTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -73,7 +73,7 @@ impl BroadcastSmRespBuilder {
         self
     }
 
-    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<impl Into<BroadcastResponseTlvValue>>) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<BroadcastResponseTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

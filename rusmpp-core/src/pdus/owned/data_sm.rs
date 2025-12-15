@@ -79,9 +79,9 @@ impl DataSm {
         esm_class: EsmClass,
         registered_delivery: RegisteredDelivery,
         data_coding: DataCoding,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
+        tlvs: alloc::vec::Vec<MessageSubmissionRequestTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             service_type,
@@ -102,8 +102,8 @@ impl DataSm {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<MessageSubmissionRequestTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -185,10 +185,7 @@ impl DataSmBuilder {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<MessageSubmissionRequestTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

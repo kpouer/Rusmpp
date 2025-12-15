@@ -108,9 +108,9 @@ impl DeliverSm {
         data_coding: DataCoding,
         sm_default_msg_id: u8,
         short_message: OctetString<0, 255>,
-        tlvs: alloc::vec::Vec<impl Into<MessageDeliveryRequestTlvValue>>,
+        tlvs: alloc::vec::Vec<MessageDeliveryRequestTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         let sm_length = short_message.length() as u8;
 
@@ -160,8 +160,8 @@ impl DeliverSm {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<MessageDeliveryRequestTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<MessageDeliveryRequestTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -284,10 +284,7 @@ impl DeliverSmBuilder {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageDeliveryRequestTlvValue>>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<MessageDeliveryRequestTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

@@ -100,9 +100,9 @@ impl BroadcastSm {
         replace_if_present_flag: ReplaceIfPresentFlag,
         data_coding: DataCoding,
         sm_default_msg_id: u8,
-        tlvs: alloc::vec::Vec<impl Into<BroadcastRequestTlvValue>>,
+        tlvs: alloc::vec::Vec<BroadcastRequestTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             service_type,
@@ -124,8 +124,8 @@ impl BroadcastSm {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<BroadcastRequestTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<BroadcastRequestTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -218,7 +218,7 @@ impl BroadcastSmBuilder {
         self
     }
 
-    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<impl Into<BroadcastRequestTlvValue>>) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<BroadcastRequestTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

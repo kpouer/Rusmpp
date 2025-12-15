@@ -27,9 +27,9 @@ macro_rules! sm_resp {
         impl<'a, const N: usize> $name<'a, N> {
             pub fn new(
                 message_id: COctetString<'a, 1, 65>,
-                tlvs: heapless::vec::Vec<impl Into<MessageDeliveryResponseTlvValue<'a>>, N>,
+                tlvs: heapless::vec::Vec<MessageDeliveryResponseTlvValue<'a>, N>,
             ) -> Self {
-                let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+                let tlvs = tlvs.into_iter().map(From::from).collect();
 
                 Self { message_id, tlvs }
             }
@@ -44,9 +44,9 @@ macro_rules! sm_resp {
 
             pub fn set_tlvs(
                 &mut self,
-                tlvs: heapless::vec::Vec<impl Into<MessageDeliveryResponseTlvValue<'a>>, N>,
+                tlvs: heapless::vec::Vec<MessageDeliveryResponseTlvValue<'a>, N>,
             ) {
-                self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+                self.tlvs = tlvs.into_iter().map(From::from).collect();
             }
 
             pub fn push_tlv(&mut self, tlv: impl Into<MessageDeliveryResponseTlvValue<'a>>) -> Result<(), Tlv<'a>> {
@@ -79,7 +79,7 @@ macro_rules! sm_resp {
 
                 pub fn tlvs(
                     mut self,
-                    tlvs: heapless::vec::Vec<impl Into<MessageDeliveryResponseTlvValue<'a>>, N>,
+                    tlvs: heapless::vec::Vec<MessageDeliveryResponseTlvValue<'a>, N>,
                 ) -> Self {
                     self.inner.set_tlvs(tlvs);
                     self
