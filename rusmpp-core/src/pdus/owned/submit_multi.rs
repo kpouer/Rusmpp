@@ -3,10 +3,7 @@ use rusmpp_macros::Rusmpp;
 use crate::{
     encode::Length,
     pdus::owned::Pdu,
-    tlvs::{
-        TlvTag,
-        owned::{MessageSubmissionRequestTlvValue, Tlv},
-    },
+    tlvs::owned::{MessageSubmissionRequestTlvValue, Tlv},
     types::owned::{COctetString, EmptyOrFullCOctetString, OctetString},
     values::{owned::*, *},
 };
@@ -147,53 +144,6 @@ impl SubmitMulti {
         }
     }
 
-    /// Creates a new [`SubmitMulti`] instance, returning `None` if both `short_message` and
-    /// `message_payload` TLV are set
-    #[allow(clippy::too_many_arguments)]
-    pub fn try_new(
-        service_type: ServiceType,
-        source_addr_ton: Ton,
-        source_addr_npi: Npi,
-        source_addr: COctetString<1, 21>,
-        dest_address: alloc::vec::Vec<DestAddress>,
-        esm_class: EsmClass,
-        protocol_id: u8,
-        priority_flag: PriorityFlag,
-        schedule_delivery_time: EmptyOrFullCOctetString<17>,
-        validity_period: EmptyOrFullCOctetString<17>,
-        registered_delivery: RegisteredDelivery,
-        replace_if_present_flag: ReplaceIfPresentFlag,
-        data_coding: DataCoding,
-        sm_default_msg_id: u8,
-        short_message: OctetString<0, 255>,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionRequestTlvValue>>,
-    ) -> Option<Self> {
-        let submit_multi = Self::new(
-            service_type,
-            source_addr_ton,
-            source_addr_npi,
-            source_addr,
-            dest_address,
-            esm_class,
-            protocol_id,
-            priority_flag,
-            schedule_delivery_time,
-            validity_period,
-            registered_delivery,
-            replace_if_present_flag,
-            data_coding,
-            sm_default_msg_id,
-            short_message,
-            tlvs,
-        );
-
-        if submit_multi.short_message_exists() && submit_multi.message_payload_exists() {
-            return None;
-        }
-
-        Some(submit_multi)
-    }
-
     pub const fn number_of_dests(&self) -> u8 {
         self.number_of_dests
     }
@@ -223,6 +173,23 @@ impl SubmitMulti {
 
     pub const fn short_message(&self) -> &OctetString<0, 255> {
         &self.short_message
+    }
+
+    /// Sets the `short_message` and `sm_length`.
+    ///
+    /// # Note
+    ///
+    /// `short_message` is superceded by [`TlvValue::MessagePayload`](crate::tlvs::owned::TlvValue::MessagePayload) and should only be used if
+    /// [`TlvValue::MessagePayload`](crate::tlvs::owned::TlvValue::MessagePayload) is not present.
+    pub fn set_short_message(&mut self, short_message: OctetString<0, 255>) {
+        self.short_message = short_message;
+        self.sm_length = self.short_message.length() as u8;
+    }
+
+    /// Clears the `short_message` and sets the `sm_length` to `0`.
+    pub fn clear_short_message(&mut self) {
+        self.short_message = OctetString::empty();
+        self.sm_length = 0;
     }
 
     pub fn tlvs(&self) -> &[Tlv] {
@@ -375,12 +342,6 @@ impl SubmitMultiBuilder {
         self.inner
     }
 }
-
-crate::macros::owned_short_message!(
-    SubmitMulti,
-    SubmitMultiBuilder,
-    MessageSubmissionRequestTlvValue
-);
 
 #[cfg(test)]
 mod tests {

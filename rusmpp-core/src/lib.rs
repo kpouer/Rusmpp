@@ -63,5 +63,3 @@ pub mod framez;
 pub mod tokio_codec;
 
 pub mod udhs;
-
-pub(crate) mod macros;
