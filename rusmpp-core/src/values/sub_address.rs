@@ -24,8 +24,8 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        crate::tests::borrowed::encode_decode_test_instances::<SubaddressTag>();
         #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<SubaddressTag>();
+        crate::tests::borrowed::encode_decode_test_instances::<SubaddressTag>();
     }
 }

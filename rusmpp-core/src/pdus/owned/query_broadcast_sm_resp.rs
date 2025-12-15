@@ -127,7 +127,6 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_with_length_test_instances::<QueryBroadcastSmResp>();
     }
 }

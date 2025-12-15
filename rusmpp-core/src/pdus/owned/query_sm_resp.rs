@@ -121,7 +121,6 @@ mod tests {
 
     #[test]
     fn encode_decode() {
-        #[cfg(feature = "alloc")]
         crate::tests::owned::encode_decode_test_instances::<QuerySmResp>();
     }
 }
