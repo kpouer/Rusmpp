@@ -1,10 +1,75 @@
-//! Mocks for Stream/Sink and Delay used in tests.
+//! Mocks for Io, Stream/Sink and Delay used in tests.
 
 use std::{
     pin::Pin,
     task::{Context, Poll},
     time::Duration,
 };
+
+pub mod io {
+    use std::io;
+
+    use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+
+    use super::*;
+
+    /// AsyncRead and AsyncWrite mock for IO streams.
+    #[mockall::automock]
+    pub trait Io {
+        fn poll_read_pin<'a, 'b>(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'a>,
+            buf: &mut ReadBuf<'b>,
+        ) -> Poll<io::Result<()>>;
+
+        fn poll_write_pin<'a>(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'a>,
+            buf: &[u8],
+        ) -> Poll<Result<usize, io::Error>>;
+
+        fn poll_flush_pin<'a>(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'a>,
+        ) -> Poll<Result<(), io::Error>>;
+
+        fn poll_shutdown_pin<'a>(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'a>,
+        ) -> Poll<Result<(), io::Error>>;
+    }
+
+    impl AsyncRead for MockIo {
+        fn poll_read(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'_>,
+            buf: &mut ReadBuf<'_>,
+        ) -> Poll<io::Result<()>> {
+            self.poll_read_pin(cx, buf)
+        }
+    }
+
+    impl AsyncWrite for MockIo {
+        fn poll_write(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'_>,
+            buf: &[u8],
+        ) -> Poll<Result<usize, io::Error>> {
+            self.poll_write_pin(cx, buf)
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
+            self.poll_flush_pin(cx)
+        }
+
+        fn poll_shutdown(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'_>,
+        ) -> Poll<Result<(), io::Error>> {
+            self.poll_shutdown_pin(cx)
+        }
+    }
+}
 
 pub mod framed {
     use futures::{Sink, Stream};

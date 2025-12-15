@@ -4,7 +4,14 @@
 //!
 //! For more in depth tests, see `connection/tests.rs`.
 
-use std::time::{Duration, Instant};
+use std::{
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    task::Poll,
+    time::{Duration, Instant},
+};
 
 use futures::{SinkExt, StreamExt};
 use rusmpp::{
@@ -18,7 +25,7 @@ use rusmpp::{
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_util::codec::Framed;
 
-use crate::{ConnectionBuilder, Event, error::Error};
+use crate::{ConnectionBuilder, Event, error::Error, mock::io::MockIo};
 
 #[derive(Debug)]
 pub struct Server {
@@ -800,4 +807,31 @@ async fn disabled_auto_enquire_link_response_should_pipe_enquire_link_through_ev
     };
 
     assert!(matches!(command.id(), CommandId::EnquireLink));
+}
+
+#[tokio::test]
+async fn stream_shutdown_should_be_called() {
+    init_tracing();
+
+    let shutdown_called = Arc::new(AtomicBool::new(false));
+    let shutdown_called_clone = shutdown_called.clone();
+
+    let mut io = MockIo::new();
+
+    io.expect_poll_flush_pin()
+        .returning(move |_cx| Poll::Ready(Ok(())));
+
+    io.expect_poll_shutdown_pin().returning(move |_cx| {
+        shutdown_called_clone.store(true, Ordering::SeqCst);
+        Poll::Ready(Ok(()))
+    });
+
+    let (client, _) = ConnectionBuilder::new().connected(io);
+
+    client.close().await.expect("Failed to close connection");
+
+    assert!(
+        shutdown_called.load(Ordering::SeqCst),
+        "Stream shutdown was not called"
+    );
 }
