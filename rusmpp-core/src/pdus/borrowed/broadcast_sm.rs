@@ -100,9 +100,9 @@ impl<'a, const N: usize> BroadcastSm<'a, N> {
         replace_if_present_flag: ReplaceIfPresentFlag,
         data_coding: DataCoding,
         sm_default_msg_id: u8,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastRequestTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<BroadcastRequestTlvValue<'a>, N>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             service_type,
@@ -124,11 +124,8 @@ impl<'a, const N: usize> BroadcastSm<'a, N> {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastRequestTlvValue<'a>>, N>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: heapless::vec::Vec<BroadcastRequestTlvValue<'a>, N>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -225,10 +222,7 @@ impl<'a, const N: usize> BroadcastSmBuilder<'a, N> {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: heapless::vec::Vec<impl Into<BroadcastRequestTlvValue<'a>>, N>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: heapless::vec::Vec<BroadcastRequestTlvValue<'a>, N>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

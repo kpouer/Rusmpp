@@ -26,9 +26,9 @@ macro_rules! sm_resp {
         impl $name {
             pub fn new(
                 message_id: COctetString<1, 65>,
-                tlvs: alloc::vec::Vec<impl Into<MessageDeliveryResponseTlvValue>>,
+                tlvs: alloc::vec::Vec<MessageDeliveryResponseTlvValue>,
             ) -> Self {
-                let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+                let tlvs = tlvs.into_iter().map(From::from).collect();
 
                 Self { message_id, tlvs }
             }
@@ -41,11 +41,8 @@ macro_rules! sm_resp {
                 &self.tlvs
             }
 
-            pub fn set_tlvs(
-                &mut self,
-                tlvs: alloc::vec::Vec<impl Into<MessageDeliveryResponseTlvValue>>,
-            ) {
-                self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+            pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<MessageDeliveryResponseTlvValue>) {
+                self.tlvs = tlvs.into_iter().map(From::from).collect();
             }
 
             pub fn push_tlv(&mut self, tlv: impl Into<MessageDeliveryResponseTlvValue>) {
@@ -77,7 +74,7 @@ macro_rules! sm_resp {
 
                 pub fn tlvs(
                     mut self,
-                    tlvs: alloc::vec::Vec<impl Into<MessageDeliveryResponseTlvValue>>,
+                    tlvs: alloc::vec::Vec<MessageDeliveryResponseTlvValue>,
                 ) -> Self {
                     self.inner.set_tlvs(tlvs);
                     self

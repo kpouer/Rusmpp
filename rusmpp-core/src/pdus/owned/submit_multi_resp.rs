@@ -36,11 +36,11 @@ impl SubmitMultiResp {
     pub fn new(
         message_id: COctetString<1, 65>,
         unsuccess_sme: alloc::vec::Vec<UnsuccessSme>,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
+        tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>,
     ) -> Self {
         let no_unsuccess = unsuccess_sme.len() as u8;
 
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             message_id,
@@ -77,11 +77,8 @@ impl SubmitMultiResp {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -133,10 +130,7 @@ impl SubmitMultiRespBuilder {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

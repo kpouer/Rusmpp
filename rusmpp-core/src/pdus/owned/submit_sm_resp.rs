@@ -24,9 +24,9 @@ pub struct SubmitSmResp {
 impl SubmitSmResp {
     pub fn new(
         message_id: COctetString<1, 65>,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
+        tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self { message_id, tlvs }
     }
@@ -39,11 +39,8 @@ impl SubmitSmResp {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -80,10 +77,7 @@ impl SubmitSmRespBuilder {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: alloc::vec::Vec<impl Into<MessageSubmissionResponseTlvValue>>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<MessageSubmissionResponseTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

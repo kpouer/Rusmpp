@@ -37,11 +37,11 @@ impl<'a, const N: usize> SubmitMultiResp<'a, N> {
     pub fn new(
         message_id: COctetString<'a, 1, 65>,
         unsuccess_sme: heapless::vec::Vec<UnsuccessSme<'a>, N>,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionResponseTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<MessageSubmissionResponseTlvValue<'a>, N>,
     ) -> Self {
         let no_unsuccess = unsuccess_sme.len() as u8;
 
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             message_id,
@@ -82,11 +82,8 @@ impl<'a, const N: usize> SubmitMultiResp<'a, N> {
         &self.tlvs
     }
 
-    pub fn set_tlvs(
-        &mut self,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionResponseTlvValue<'a>>, N>,
-    ) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: heapless::vec::Vec<MessageSubmissionResponseTlvValue<'a>, N>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -147,7 +144,7 @@ impl<'a, const N: usize> SubmitMultiRespBuilder<'a, N> {
 
     pub fn tlvs(
         mut self,
-        tlvs: heapless::vec::Vec<impl Into<MessageSubmissionResponseTlvValue<'a>>, N>,
+        tlvs: heapless::vec::Vec<MessageSubmissionResponseTlvValue<'a>, N>,
     ) -> Self {
         self.inner.set_tlvs(tlvs);
         self

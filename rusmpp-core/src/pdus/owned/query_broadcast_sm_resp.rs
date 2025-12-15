@@ -25,9 +25,9 @@ pub struct QueryBroadcastSmResp {
 impl QueryBroadcastSmResp {
     pub fn new(
         message_id: COctetString<1, 65>,
-        tlvs: alloc::vec::Vec<impl Into<QueryBroadcastResponseTlvValue>>,
+        tlvs: alloc::vec::Vec<QueryBroadcastResponseTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self { message_id, tlvs }
     }
@@ -36,8 +36,8 @@ impl QueryBroadcastSmResp {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<QueryBroadcastResponseTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<QueryBroadcastResponseTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -74,10 +74,7 @@ impl QueryBroadcastSmRespBuilder {
         self
     }
 
-    pub fn tlvs(
-        mut self,
-        tlvs: alloc::vec::Vec<impl Into<QueryBroadcastResponseTlvValue>>,
-    ) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<QueryBroadcastResponseTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }

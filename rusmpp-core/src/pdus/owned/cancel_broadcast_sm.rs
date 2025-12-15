@@ -72,9 +72,9 @@ impl CancelBroadcastSm {
         source_addr_ton: Ton,
         source_addr_npi: Npi,
         source_addr: COctetString<1, 21>,
-        tlvs: alloc::vec::Vec<impl Into<CancelBroadcastTlvValue>>,
+        tlvs: alloc::vec::Vec<CancelBroadcastTlvValue>,
     ) -> Self {
-        let tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+        let tlvs = tlvs.into_iter().map(From::from).collect();
 
         Self {
             service_type,
@@ -90,8 +90,8 @@ impl CancelBroadcastSm {
         &self.tlvs
     }
 
-    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<impl Into<CancelBroadcastTlvValue>>) {
-        self.tlvs = tlvs.into_iter().map(Into::into).map(From::from).collect();
+    pub fn set_tlvs(&mut self, tlvs: alloc::vec::Vec<CancelBroadcastTlvValue>) {
+        self.tlvs = tlvs.into_iter().map(From::from).collect();
     }
 
     pub fn clear_tlvs(&mut self) {
@@ -148,7 +148,7 @@ impl CancelBroadcastSmBuilder {
         self
     }
 
-    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<impl Into<CancelBroadcastTlvValue>>) -> Self {
+    pub fn tlvs(mut self, tlvs: alloc::vec::Vec<CancelBroadcastTlvValue>) -> Self {
         self.inner.set_tlvs(tlvs);
         self
     }
