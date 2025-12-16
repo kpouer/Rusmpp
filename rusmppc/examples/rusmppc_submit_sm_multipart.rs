@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn core::error::Error>> {
     for (i, sm) in multipart.into_iter().enumerate() {
         tracing::info!(part=i+1, short_message_len=sm.short_message().len(), esm_class=?sm.esm_class, data_coding=?sm.data_coding, "Sending SubmitSm");
 
-        let response = client.submit_sm(sm.clone()).await?;
+        let response = client.submit_sm(sm).await?;
 
         tracing::info!(?response, "Got SubmitSmResp");
     }
