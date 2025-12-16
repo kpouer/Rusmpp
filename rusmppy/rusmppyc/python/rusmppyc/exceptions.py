@@ -12,6 +12,8 @@ from .rusmppyc import (
     UnexpectedResponseException,
     UnsupportedInterfaceVersionException,
     ValueException,
+    ShortMessageEncodeException,
+    ShortMessageMultipartException,
 )
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
     "UnexpectedResponseException",
     "UnsupportedInterfaceVersionException",
     "ValueException",
+    "ShortMessageEncodeException",
+    "ShortMessageMultipartException",
 ]

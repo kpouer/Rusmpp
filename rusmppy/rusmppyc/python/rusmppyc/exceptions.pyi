@@ -9,6 +9,8 @@ __all__ = [
     "UnexpectedResponseException",
     "UnsupportedInterfaceVersionException",
     "ValueException",
+    "ShortMessageEncodeException",
+    "ShortMessageMultipartException",
 ]
 
 class RusmppycException(Exception):
@@ -58,5 +60,15 @@ class UnsupportedInterfaceVersionException(RusmppycException):
 
 class ValueException(RusmppycException):
     "The client created an invalid `SMPP` value."
+
+    ...
+
+class ShortMessageEncodeException(RusmppycException):
+    "Failed to encode `short_message`."
+
+    ...
+
+class ShortMessageMultipartException(RusmppycException):
+    "Failed to create `short_message` parts."
 
     ...

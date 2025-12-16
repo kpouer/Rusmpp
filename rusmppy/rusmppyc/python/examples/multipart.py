@@ -1,25 +1,17 @@
 import asyncio
 import logging
+import random
 
 from rusmppyc import (
-    BindTransceiverResp,
     Client,
     CommandId,
-    DataCoding,
+    RegisteredDelivery,
+    SubmitSm,
     Event,
     Events,
-    InterfaceVersion,
-    Npi,
     SubmitSmResp,
-    Ton,
-    EsmClass,
-    GsmFeatures,
-    MessageType,
-    ReplaceIfPresentFlag,
-    RegisteredDelivery,
-    MCDeliveryReceipt,
-    IntermediateNotification,
-    SmeOriginatedAcknowledgement,
+    Encoder,
+    Ucs2,
 )
 from rusmppyc.exceptions import RusmppycException
 
@@ -44,8 +36,6 @@ async def handle_events(events: Events, client: Client):
             case _:
                 logging.warning(f"Unknown event: {event}")
 
-    logging.debug("Event handling completed")
-
 
 async def main():
     try:
@@ -59,47 +49,30 @@ async def main():
 
         asyncio.create_task(handle_events(events, client))
 
-        bind_response: BindTransceiverResp = await client.bind_transceiver(
-            system_id="test",
-            password="test",
-            system_type="test",
-            interface_version=InterfaceVersion.Smpp5_0(),
-            addr_ton=Ton.Unknown(),
-            addr_npi=Npi.National(),
-        )
+        await client.bind_transceiver(system_id="test", password="test")
 
-        logging.info(f"Bind response: {bind_response}")
-        logging.info(f"Bind response system_id: {bind_response.system_id}")
-        logging.info(
-            f"Bind response sc_interface_version: {bind_response.sc_interface_version}"
-        )
+        # Used to link all parts of the multipart message together
+        reference = random.randint(0, 255)
 
-        submit_sm_response: SubmitSmResp = await client.submit_sm(
-            source_addr_ton=Ton.International(),
-            source_addr_npi=Npi.National(),
-            source_addr="1234567890",
-            dest_addr_ton=Ton.International(),
-            dest_addr_npi=Npi.National(),
-            destination_addr="0987654321",
-            data_coding=DataCoding.McSpecific(),
-            esm_class=EsmClass(
-                message_type=MessageType.ShortMessageContainsMCDeliveryReceipt(),
-                gsm_features=GsmFeatures.NotSelected(),
-                # Omitted fields use default values
-            ),
-            replace_if_present_flag=ReplaceIfPresentFlag.DoNotReplace(),
-            registered_delivery=RegisteredDelivery(
-                mc_delivery_receipt=MCDeliveryReceipt.McDeliveryReceiptRequestedWhereFinalDeliveryOutcomeIsSuccessOrFailure(),
-                sme_originated_acknowledgement=SmeOriginatedAcknowledgement.BothDeliveryAndUserAcknowledgmentRequested(),
-                intermediate_notification=IntermediateNotification.IntermediateNotificationRequested(),
-            ),
-            # This is equivalent to the above but more convenient
-            # registered_delivery=RegisteredDelivery.request_all(),
-            short_message=b"Hello, World!",
-            # Omitted fields use default values
-        )
+        try:
+            multipart: list[SubmitSm] = client.submit_sm_multipart(
+                short_message="Hi how are you?" * 20,
+                reference=reference,
+                encoder=Encoder.Ucs2(Ucs2()),
+                registered_delivery=RegisteredDelivery.request_all(),
+            )
 
-        logging.info(f"SubmitSm response: {submit_sm_response}")
+            logging.info(f"Multipart: {multipart}")
+
+            for i, submit_sm in enumerate(multipart):
+                logging.info(f"Sending part {i + 1} of {len(multipart)}: {submit_sm}")
+
+                submit_sm_resp: SubmitSmResp = await client.submit_sm(submit_sm)
+
+                logging.info(f"SubmitSm Response {i + 1}: {submit_sm_resp}")
+
+        except RusmppycException as e:
+            logging.error(f"Failed to send multipart message: {e}")
 
         await asyncio.sleep(5)
 

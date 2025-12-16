@@ -2,24 +2,19 @@ import asyncio
 import logging
 
 from rusmppyc import (
-    BindTransceiverResp,
     Client,
     CommandId,
-    DataCoding,
+    RegisteredDelivery,
+    SubmitSm,
     Event,
     Events,
-    InterfaceVersion,
-    Npi,
     SubmitSmResp,
+    Gsm7BitAlphabet,
+    Gsm7BitUnpacked,
+    Encoder,
     Ton,
-    EsmClass,
-    GsmFeatures,
-    MessageType,
-    ReplaceIfPresentFlag,
-    RegisteredDelivery,
-    MCDeliveryReceipt,
-    IntermediateNotification,
-    SmeOriginatedAcknowledgement,
+    Npi,
+    MessageSubmissionRequestTlvValue,
 )
 from rusmppyc.exceptions import RusmppycException
 
@@ -44,8 +39,6 @@ async def handle_events(events: Events, client: Client):
             case _:
                 logging.warning(f"Unknown event: {event}")
 
-    logging.debug("Event handling completed")
-
 
 async def main():
     try:
@@ -59,47 +52,36 @@ async def main():
 
         asyncio.create_task(handle_events(events, client))
 
-        bind_response: BindTransceiverResp = await client.bind_transceiver(
-            system_id="test",
-            password="test",
-            system_type="test",
-            interface_version=InterfaceVersion.Smpp5_0(),
-            addr_ton=Ton.Unknown(),
-            addr_npi=Npi.National(),
-        )
+        await client.bind_transceiver(system_id="test", password="test")
 
-        logging.info(f"Bind response: {bind_response}")
-        logging.info(f"Bind response system_id: {bind_response.system_id}")
-        logging.info(
-            f"Bind response sc_interface_version: {bind_response.sc_interface_version}"
-        )
+        # c-spell: disable
+        short_message = r"""Hello world!
+            @£$¥èéùìòÇØøÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà
+            ^{}\[~]|€"""
+        # c-spell: enable
 
-        submit_sm_response: SubmitSmResp = await client.submit_sm(
-            source_addr_ton=Ton.International(),
-            source_addr_npi=Npi.National(),
-            source_addr="1234567890",
-            dest_addr_ton=Ton.International(),
-            dest_addr_npi=Npi.National(),
-            destination_addr="0987654321",
-            data_coding=DataCoding.McSpecific(),
-            esm_class=EsmClass(
-                message_type=MessageType.ShortMessageContainsMCDeliveryReceipt(),
-                gsm_features=GsmFeatures.NotSelected(),
-                # Omitted fields use default values
-            ),
-            replace_if_present_flag=ReplaceIfPresentFlag.DoNotReplace(),
-            registered_delivery=RegisteredDelivery(
-                mc_delivery_receipt=MCDeliveryReceipt.McDeliveryReceiptRequestedWhereFinalDeliveryOutcomeIsSuccessOrFailure(),
-                sme_originated_acknowledgement=SmeOriginatedAcknowledgement.BothDeliveryAndUserAcknowledgmentRequested(),
-                intermediate_notification=IntermediateNotification.IntermediateNotificationRequested(),
-            ),
-            # This is equivalent to the above but more convenient
-            # registered_delivery=RegisteredDelivery.request_all(),
-            short_message=b"Hello, World!",
-            # Omitted fields use default values
-        )
+        try:
+            # If the encoded message exceeds 140 bytes, the SubmitSm will not be split into multiple parts automatically.
+            # For this use case, use `submit_sm_multipart` method instead.
+            submit_sm: SubmitSm = client.submit_sm_encode(
+                short_message=short_message,
+                encoder=Encoder.Gsm7BitUnpacked(
+                    Gsm7BitUnpacked(alphabet=Gsm7BitAlphabet.default())
+                ),
+                source_addr_ton=Ton.International(),
+                source_addr_npi=Npi.National(),
+                registered_delivery=RegisteredDelivery.request_all(),
+                tlvs=[MessageSubmissionRequestTlvValue.BillingIdentification(b"bytes")],
+            )
 
-        logging.info(f"SubmitSm response: {submit_sm_response}")
+            logging.info(f"Encoded SubmitSm: {submit_sm}")
+
+            submit_sm_response: SubmitSmResp = await client.submit_sm(submit_sm)
+
+            logging.info(f"SubmitSm response: {submit_sm_response}")
+
+        except RusmppycException as e:
+            logging.error(f"Failed to submit message: {e}")
 
         await asyncio.sleep(5)
 

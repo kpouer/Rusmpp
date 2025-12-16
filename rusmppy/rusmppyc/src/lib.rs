@@ -8,6 +8,7 @@ use pyo3_stub_gen::define_stub_info_gatherer;
 use crate::generated::add_classes;
 
 mod client;
+mod encoder;
 mod error;
 mod event;
 mod exception;
@@ -25,6 +26,14 @@ fn rusmppyc(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<event::Event>()?;
     m.add_class::<event::Events>()?;
     m.add_class::<error::Error>()?;
+
+    m.add_class::<encoder::Encoder>()?;
+    m.add_class::<encoder::Gsm7BitUnpacked>()?;
+    m.add_class::<encoder::Ucs2>()?;
+    m.add_class::<encoder::Latin1>()?;
+
+    m.add_class::<encoder::Gsm7BitAlphabet>()?;
+    m.add_class::<encoder::Gsm7BitDefaultAlphabet>()?;
 
     // add all auto generated structs and enums
     add_classes(m)?;
@@ -52,6 +61,14 @@ fn rusmppyc(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
         py.get_type::<UnsupportedInterfaceVersionException>(),
     )?;
     m.add("ValueException", py.get_type::<ValueException>())?;
+    m.add(
+        "ShortMessageEncodeException",
+        py.get_type::<ShortMessageEncodeException>(),
+    )?;
+    m.add(
+        "ShortMessageMultipartException",
+        py.get_type::<ShortMessageMultipartException>(),
+    )?;
 
     Ok(())
 }

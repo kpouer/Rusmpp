@@ -87,10 +87,10 @@ async def main():
             dest_addr_ton=Ton.International(),
             dest_addr_npi=Npi.National(),
             destination_addr="0987654321",
-            data_coding=DataCoding.Ucs2(),
+            data_coding=DataCoding.McSpecific(),
             short_message=b"Hello, World!",
             tlvs=[
-                # The message payload will override the short message
+                # The message payload will supersede the short_message field and should only be used if short_message is empty
                 MessageSubmissionRequestTlvValue.MessagePayload(
                     MessagePayload(b"Big Message" * 10)
                 )
@@ -123,6 +123,8 @@ if __name__ == "__main__":
 
     asyncio.run(main())
 ```
+
+For more examples, see the [examples directory](https://github.com/Rusmpp/Rusmpp/tree/main/rusmppy/rusmppyc/python/examples).
 
 ## Develop
 
