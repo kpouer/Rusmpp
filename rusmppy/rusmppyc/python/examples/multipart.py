@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import random
 
 from rusmppyc import (
     Client,
@@ -50,9 +51,13 @@ async def main():
 
         await client.bind_transceiver(system_id="test", password="test")
 
+        # Used to link all parts of the multipart message together
+        reference = random.randint(0, 255)
+
         try:
             multipart: list[SubmitSm] = client.submit_sm_multipart(
                 short_message="Hi how are you?" * 20,
+                reference=reference,
                 encoder=Encoder.Ucs2(Ucs2()),
                 registered_delivery=RegisteredDelivery.request_all(),
             )

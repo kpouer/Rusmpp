@@ -554,7 +554,6 @@ class Client:
         """
         ...
 
-    # TODO: docs, short_message is str and not optional. there is no data coding
     @classmethod
     def submit_sm_multipart(
         cls,
@@ -579,10 +578,73 @@ class Client:
         sm_default_msg_id: builtins.int = 0,
         tlvs: builtins.list[MessageSubmissionRequestTlvValue] = [],
     ) -> List[SubmitSm]:
-        """"""
+        """
+        Splits a long message into multiple ``SubmitSm`` PDUs for multipart submission.
+
+        The message will be split according to the specified
+        ``max_short_message_size`` and encoded using the provided ``encoder``.
+
+        ``esm_class`` will be automatically updated to indicate that the message is
+        part of a multipart message.
+
+        ``data_coding`` is inferred from the provided ``encoder``.
+
+        Parameters
+        ----------
+        short_message : str
+            The full message to be sent.
+        max_short_message_size : int, default=140
+            The maximum size in bytes for each individual message part.
+            Messages longer than this size will be split into multiple parts.
+        reference : int, default=0
+            An identifier used to link all parts of the multipart message together.
+            This value should be unique for each multipart message sent.
+        encoder : Encoder, default=Encoder.Gsm7BitUnpacked(Gsm7BitUnpacked.default())
+            The encoder used to encode the message content.
+        service_type : str, default=""
+            The service type (e.g., ``"CMT"``, ``"WAP"``, or vendor-defined).
+        source_addr_ton : Ton, default=Ton.Unknown()
+            The Type of Number (TON) for the source address.
+        source_addr_npi : Npi, default=Npi.Unknown()
+            The Numbering Plan Indicator (NPI) for the source address.
+        source_addr : str, default=""
+            The source address (e.g., sender ID).
+        dest_addr_ton : Ton, default=Ton.Unknown()
+            The Type of Number (TON) for the destination address.
+        dest_addr_npi : Npi, default=Npi.Unknown()
+            The Numbering Plan Indicator (NPI) for the destination address.
+        destination_addr : str
+            The destination address (recipient phone number).
+        esm_class : EsmClass, default=EsmClass.default()
+            The message mode and type (e.g., delivery receipt request, datagram mode).
+        protocol_id : int, default=0
+            The protocol identifier.
+        priority_flag : int, default=0
+            The priority level of the message.
+        schedule_delivery_time : str, default=""
+            The scheduled delivery time in SMPP absolute or relative format.
+        validity_period : str, default=""
+            The validity period for the message in SMPP absolute or relative format.
+        registered_delivery : RegisteredDelivery, default=RegisteredDelivery.default()
+            Controls whether delivery receipts or intermediate notifications are requested.
+        replace_if_present_flag : ReplaceIfPresentFlag = ReplaceIfPresentFlag.DoNotReplace(),
+            Indicates whether to replace an existing message with the same ID.
+        sm_default_msg_id : int, default=0
+            The default short message ID.
+        tlvs: List[MessageSubmissionRequestTlvValue], default=[]
+            The Message Submission Request TLVs.
+
+        Returns
+        -------
+        List[SubmitSm]
+            A list of ``SubmitSm`` PDUs representing the multipart message.
+
+        Raises
+        ------
+        ShortMessageMultipartException
+        """
         ...
 
-    # TODO: docs, short_message is str and not optional. there is no data coding
     @classmethod
     def submit_sm_encode(
         cls,
@@ -605,5 +667,62 @@ class Client:
         sm_default_msg_id: builtins.int = 0,
         tlvs: builtins.list[MessageSubmissionRequestTlvValue] = [],
     ) -> SubmitSm:
-        """"""
+        """
+        Encodes a message into a ``SubmitSm`` PDU using the specified encoder.
+
+        ``data_coding`` is inferred from the provided ``encoder``.
+
+        Parameters
+        ----------
+        short_message : str
+            The full message to be encoded.
+        encoder : Encoder, default=Encoder.Gsm7BitUnpacked(Gsm7BitUnpacked.default())
+            The encoder used to encode the message content.
+        service_type : str, default=""
+            The service type (e.g., ``"CMT"``, ``"WAP"``, or vendor-defined).
+        source_addr_ton : Ton, default=Ton.Unknown()
+            The Type of Number (TON) for the source address.
+        source_addr_npi : Npi, default=Npi.Unknown()
+            The Numbering Plan Indicator (NPI) for the source address.
+        source_addr : str, default=""
+            The source address (e.g., sender ID).
+        dest_addr_ton : Ton, default=Ton.Unknown()
+            The Type of Number (TON) for the destination address.
+        dest_addr_npi : Npi, default=Npi.Unknown()
+            The Numbering Plan Indicator (NPI) for the destination address.
+        destination_addr : str
+            The destination address (recipient phone number).
+        esm_class : EsmClass, default=EsmClass.default()
+            The message mode and type (e.g., delivery receipt request, datagram mode).
+        protocol_id : int, default=0
+            The protocol identifier.
+        priority_flag : int, default=0
+            The priority level of the message.
+        schedule_delivery_time : str, default=""
+            The scheduled delivery time in SMPP absolute or relative format.
+        validity_period : str, default=""
+            The validity period for the message in SMPP absolute or relative format.
+        registered_delivery : RegisteredDelivery, default=RegisteredDelivery.default()
+            Controls whether delivery receipts or intermediate notifications are requested.
+        replace_if_present_flag : ReplaceIfPresentFlag = ReplaceIfPresentFlag.DoNotReplace(),
+            Indicates whether to replace an existing message with the same ID.
+        sm_default_msg_id : int, default=0
+            The default short message ID.
+        tlvs: List[MessageSubmissionRequestTlvValue], default=[]
+            The Message Submission Request TLVs.
+
+        Returns
+        -------
+        SubmitSm
+            The encoded ``SubmitSm`` PDU.
+
+        Raises
+        ------
+        ShortMessageEncodeException
+
+        Notes
+        -----
+        This method does not handle multipart messages. For messages that exceed the
+        maximum size (255 bytes), use ``submit_sm_multipart`` instead.
+        """
         ...
