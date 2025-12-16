@@ -376,14 +376,36 @@ class Client:
         """
         ...
 
-    # TODO: docs
     @overload
     async def submit_sm(
         self,
         submit_sm: SubmitSm,
         status: CommandStatus = CommandStatus.EsmeRok(),
     ) -> SubmitSmResp:
-        """"""
+        """
+        Sends a ``SubmitSm`` command to the server and waits for a successful ``SubmitSmResp``.
+
+        Parameters
+        ----------
+        submit_sm : SubmitSm
+            The ``SubmitSm`` PDU to send.
+        status : CommandStatus, default=CommandStatus.EsmeRok()
+            The command status to include in the ``SubmitSm`` request.
+
+        Returns
+        -------
+        SubmitSmResp
+            The response returned by the server upon a successful ``SubmitSm`` request.
+
+        Raises
+        ------
+        RusmppycException
+
+        Notes
+        -----
+        This overload allows sending a pre-constructed ``SubmitSm`` PDU.
+        Use this method with ``SubmitSm``s created via helper methods like ``submit_sm_encode`` or ``submit_sm_multipart``.
+        """
         ...
 
     async def deliver_sm_resp(
