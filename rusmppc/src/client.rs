@@ -117,9 +117,15 @@ impl Client {
         self.registered_request().data_sm(data_sm).await
     }
 
-    /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
-    pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
-        self.registered_request().submit_sm(submit_sm).await
+    /// Sends a [`DataSmResp`] command to the server.
+    pub async fn data_sm_resp(
+        &self,
+        sequence_number: u32,
+        data_sm_resp: impl Into<DataSmResp>,
+    ) -> Result<(), Error> {
+        self.unregistered_request()
+            .data_sm_resp(sequence_number, data_sm_resp)
+            .await
     }
 
     /// Sends a [`DeliverSmResp`] command to the server.
@@ -131,6 +137,11 @@ impl Client {
         self.unregistered_request()
             .deliver_sm_resp(sequence_number, deliver_sm_resp)
             .await
+    }
+
+    /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
+    pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
+        self.registered_request().submit_sm(submit_sm).await
     }
 
     /// Sends an [`Unbind`](Pdu::Unbind) command to the server and waits for a successful [`UnbindResp`](Pdu::UnbindResp).
@@ -369,6 +380,16 @@ impl<'a> UnregisteredRequestBuilder<'a> {
 
         // No need to timeout here, since we are not waiting for a response from the server.
         ack.await.map_err(|_| Error::ConnectionClosed)?
+    }
+
+    /// Sends a [`DataSmResp`] command to the server.
+    pub async fn data_sm_resp(
+        self,
+        sequence_number: u32,
+        data_sm_resp: impl Into<DataSmResp>,
+    ) -> Result<(), Error> {
+        self.unregistered_request(data_sm_resp.into(), sequence_number)
+            .await
     }
 
     /// Sends a [`DeliverSmResp`] command to the server.
