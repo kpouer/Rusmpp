@@ -552,6 +552,16 @@ pub struct RegisteredRequestBuilder<'a> {
     response_timeout: Option<Duration>,
 }
 
+/// Extracts a specific [`Pdu`] from a generic [`Pdu`].
+macro_rules! extract {
+    ($pdu:ident) => {
+        |pdu| match pdu {
+            Pdu::$pdu(response) => Ok(response),
+            _ => Err(pdu),
+        }
+    };
+}
+
 impl<'a> RegisteredRequestBuilder<'a> {
     fn new(client: &'a Client, status: CommandStatus) -> Self {
         Self {
@@ -657,6 +667,19 @@ impl<'a> RegisteredRequestBuilder<'a> {
             .map_err(Error::unexpected_response)
     }
 
+    /// Sends a [`Pdu`] to the server and waits for a successful response matching the given [`CommandId`].
+    async fn request_ok_and_matches(
+        &self,
+        pdu: impl Into<Pdu>,
+        id: CommandId,
+    ) -> Result<(), Error> {
+        self.request(pdu.into())
+            .await?
+            .ok_and_matches(id)
+            .map(|_| ())
+            .map_err(Error::unexpected_response)
+    }
+
     /// Sends a [`BindTransmitter`] command to the server and waits for a successful [`BindTransmitterResp`].
     pub async fn bind_transmitter(
         &self,
@@ -666,11 +689,8 @@ impl<'a> RegisteredRequestBuilder<'a> {
 
         self.check_interface_version(bind.interface_version)?;
 
-        self.request_extract(bind, |pdu| match pdu {
-            Pdu::BindTransmitterResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(bind, extract!(BindTransmitterResp))
+            .await
     }
 
     /// Sends a [`BindReceiver`] command to the server and waits for a successful [`BindReceiverResp`].
@@ -682,11 +702,7 @@ impl<'a> RegisteredRequestBuilder<'a> {
 
         self.check_interface_version(bind.interface_version)?;
 
-        self.request_extract(bind, |pdu| match pdu {
-            Pdu::BindReceiverResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(bind, extract!(BindReceiverResp)).await
     }
 
     /// Sends a [`BindTransceiver`] command to the server and waits for a successful [`BindTransceiverResp`].
@@ -698,11 +714,8 @@ impl<'a> RegisteredRequestBuilder<'a> {
 
         self.check_interface_version(bind.interface_version)?;
 
-        self.request_extract(bind, |pdu| match pdu {
-            Pdu::BindTransceiverResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(bind, extract!(BindTransceiverResp))
+            .await
     }
 
     /// Sends a [`BroadcastSm`] command to the server and waits for a successful [`BroadcastSmResp`].
@@ -710,11 +723,8 @@ impl<'a> RegisteredRequestBuilder<'a> {
         &self,
         broadcast_sm: impl Into<BroadcastSm>,
     ) -> Result<BroadcastSmResp, Error> {
-        self.request_extract(broadcast_sm.into(), |pdu| match pdu {
-            Pdu::BroadcastSmResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(broadcast_sm.into(), extract!(BroadcastSmResp))
+            .await
     }
 
     /// Sends a [`CancelBroadcastSm`] command to the server and waits for a successful [`CancelBroadcastSmResp`](Pdu::CancelBroadcastSmResp).
@@ -722,29 +732,20 @@ impl<'a> RegisteredRequestBuilder<'a> {
         &self,
         cancel_broadcast_sm: impl Into<CancelBroadcastSm>,
     ) -> Result<(), Error> {
-        self.request(cancel_broadcast_sm.into())
-            .await?
-            .ok_and_matches(CommandId::CancelBroadcastSmResp)
-            .map(|_| ())
-            .map_err(Error::unexpected_response)
+        self.request_ok_and_matches(cancel_broadcast_sm.into(), CommandId::CancelBroadcastSmResp)
+            .await
     }
 
     /// Sends a [`CancelSm`] command to the server and waits for a successful [`CancelSmResp`](Pdu::CancelSmResp).
     pub async fn cancel_sm(&self, cancel_sm: impl Into<CancelSm>) -> Result<(), Error> {
-        self.request(cancel_sm.into())
-            .await?
-            .ok_and_matches(CommandId::CancelSmResp)
-            .map(|_| ())
-            .map_err(Error::unexpected_response)
+        self.request_ok_and_matches(cancel_sm.into(), CommandId::CancelSmResp)
+            .await
     }
 
     /// Sends a [`DataSm`] command to the server and waits for a successful [`DataSmResp`].
     pub async fn data_sm(&self, data_sm: impl Into<DataSm>) -> Result<DataSmResp, Error> {
-        self.request_extract(data_sm.into(), |pdu| match pdu {
-            Pdu::DataSmResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(data_sm.into(), extract!(DataSmResp))
+            .await
     }
 
     /// Sends a [`QueryBroadcastSm`] command to the server and waits for a successful [`QueryBroadcastSmResp`].
@@ -752,29 +753,20 @@ impl<'a> RegisteredRequestBuilder<'a> {
         &self,
         query_broadcast_sm: impl Into<QueryBroadcastSm>,
     ) -> Result<QueryBroadcastSmResp, Error> {
-        self.request_extract(query_broadcast_sm.into(), |pdu| match pdu {
-            Pdu::QueryBroadcastSmResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(query_broadcast_sm.into(), extract!(QueryBroadcastSmResp))
+            .await
     }
 
     /// Sends a [`QuerySm`] command to the server and waits for a successful [`QuerySmResp`].
     pub async fn query_sm(&self, query_sm: impl Into<QuerySm>) -> Result<QuerySmResp, Error> {
-        self.request_extract(query_sm.into(), |pdu| match pdu {
-            Pdu::QuerySmResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(query_sm.into(), extract!(QuerySmResp))
+            .await
     }
 
     /// Sends a [`ReplaceSm`] command to the server and waits for a successful [`ReplaceSmResp`](Pdu::ReplaceSmResp).
     pub async fn replace_sm(&self, replace_sm: impl Into<ReplaceSm>) -> Result<(), Error> {
-        self.request(replace_sm.into())
-            .await?
-            .ok_and_matches(CommandId::ReplaceSmResp)
-            .map(|_| ())
-            .map_err(Error::unexpected_response)
+        self.request_ok_and_matches(replace_sm.into(), CommandId::ReplaceSmResp)
+            .await
     }
 
     /// Sends a [`SubmitMulti`] command to the server and waits for a successful [`SubmitMultiResp`].
@@ -782,38 +774,26 @@ impl<'a> RegisteredRequestBuilder<'a> {
         &self,
         submit_multi: impl Into<SubmitMulti>,
     ) -> Result<SubmitMultiResp, Error> {
-        self.request_extract(submit_multi.into(), |pdu| match pdu {
-            Pdu::SubmitMultiResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(submit_multi.into(), extract!(SubmitMultiResp))
+            .await
     }
 
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
-        self.request_extract(submit_sm.into(), |pdu| match pdu {
-            Pdu::SubmitSmResp(response) => Ok(response),
-            _ => Err(pdu),
-        })
-        .await
+        self.request_extract(submit_sm.into(), extract!(SubmitSmResp))
+            .await
     }
 
     /// Sends an [`Unbind`](Pdu::Unbind) command to the server and waits for a successful [`UnbindResp`](Pdu::UnbindResp).
     pub async fn unbind(&self) -> Result<(), Error> {
-        self.request(Pdu::Unbind)
-            .await?
-            .ok_and_matches(CommandId::UnbindResp)
-            .map(|_| ())
-            .map_err(Error::unexpected_response)
+        self.request_ok_and_matches(Pdu::Unbind, CommandId::UnbindResp)
+            .await
     }
 
     /// Sends an [`EnquireLink`](Pdu::EnquireLink) command to the server and waits for a successful [`EnquireLinkResp`](Pdu::EnquireLinkResp).
     pub async fn enquire_link(&self) -> Result<(), Error> {
-        self.request(Pdu::EnquireLink)
-            .await?
-            .ok_and_matches(CommandId::EnquireLinkResp)
-            .map(|_| ())
-            .map_err(Error::unexpected_response)
+        self.request_ok_and_matches(Pdu::EnquireLink, CommandId::EnquireLinkResp)
+            .await
     }
 }
 
@@ -837,15 +817,20 @@ impl<'a> NoWaitRequestBuilder<'a> {
         self
     }
 
-    /// Sends a [`BroadcastSm`] command to the server without waiting for the response.
-    pub async fn broadcast_sm(&self, broadcast_sm: impl Into<BroadcastSm>) -> Result<u32, Error> {
+    /// Sends a [`Pdu`] to the server without waiting for the response.
+    async fn send(&self, pdu: impl Into<Pdu>) -> Result<u32, Error> {
         let sequence_number = self.client.inner.next_sequence_number();
 
         self.unregistered_request()
-            .unregistered_request(broadcast_sm.into(), sequence_number)
+            .unregistered_request(pdu.into(), sequence_number)
             .await?;
 
         Ok(sequence_number)
+    }
+
+    /// Sends a [`BroadcastSm`] command to the server without waiting for the response.
+    pub async fn broadcast_sm(&self, broadcast_sm: impl Into<BroadcastSm>) -> Result<u32, Error> {
+        self.send(broadcast_sm.into()).await
     }
 
     /// Sends a [`CancelBroadcastSm`] command to the server without waiting for the response.
@@ -853,35 +838,17 @@ impl<'a> NoWaitRequestBuilder<'a> {
         &self,
         cancel_broadcast_sm: impl Into<CancelBroadcastSm>,
     ) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(cancel_broadcast_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(cancel_broadcast_sm.into()).await
     }
 
     /// Sends a [`CancelSm`] command to the server without waiting for the response.
     pub async fn cancel_sm(&self, cancel_sm: impl Into<CancelSm>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(cancel_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(cancel_sm.into()).await
     }
 
     /// Sends a [`DataSm`] command to the server without waiting for the response.
     pub async fn data_sm(&self, data_sm: impl Into<DataSm>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(data_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(data_sm.into()).await
     }
 
     /// Sends a [`QueryBroadcastSm`] command to the server without waiting for the response.
@@ -889,78 +856,36 @@ impl<'a> NoWaitRequestBuilder<'a> {
         &self,
         query_broadcast_sm: impl Into<QueryBroadcastSm>,
     ) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(query_broadcast_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(query_broadcast_sm.into()).await
     }
 
     /// Sends a [`QuerySm`] command to the server without waiting for the response.
     pub async fn query_sm(&self, query_sm: impl Into<QuerySm>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(query_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(query_sm.into()).await
     }
 
     /// Sends a [`ReplaceSm`] command to the server without waiting for the response.
     pub async fn replace_sm(&self, replace_sm: impl Into<ReplaceSm>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(replace_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(replace_sm.into()).await
     }
 
     /// Sends a [`SubmitMulti`] command to the server without waiting for the response.
     pub async fn submit_multi(&self, submit_multi: impl Into<SubmitMulti>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(submit_multi.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(submit_multi.into()).await
     }
 
     /// Sends a [`SubmitSm`] command to the server without waiting for the response.
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(submit_sm.into(), sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(submit_sm.into()).await
     }
 
     /// Sends an [`Unbind`](Pdu::Unbind) command to the server without waiting for the response.
     pub async fn unbind(&self) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(Pdu::Unbind, sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(Pdu::Unbind).await
     }
 
     /// Sends an [`EnquireLink`](Pdu::EnquireLink) command to the server without waiting for the response.
     pub async fn enquire_link(&self) -> Result<u32, Error> {
-        let sequence_number = self.client.inner.next_sequence_number();
-
-        self.unregistered_request()
-            .unregistered_request(Pdu::EnquireLink, sequence_number)
-            .await?;
-
-        Ok(sequence_number)
+        self.send(Pdu::EnquireLink).await
     }
 }
