@@ -13,7 +13,7 @@ use rusmpp::{
         BindReceiver, BindReceiverResp, BindTransceiver, BindTransceiverResp, BindTransmitter,
         BindTransmitterResp, BroadcastSm, BroadcastSmResp, CancelBroadcastSm, CancelSm, DataSm,
         DataSmResp, DeliverSmResp, QueryBroadcastSm, QueryBroadcastSmResp, QuerySm, QuerySmResp,
-        ReplaceSm, SubmitSm, SubmitSmResp,
+        ReplaceSm, SubmitMulti, SubmitMultiResp, SubmitSm, SubmitSmResp,
     },
     values::InterfaceVersion,
 };
@@ -158,6 +158,14 @@ impl Client {
     /// Sends a [`ReplaceSm`] command to the server and waits for a successful [`ReplaceSmResp`](Pdu::ReplaceSmResp).
     pub async fn replace_sm(&self, replace_sm: impl Into<ReplaceSm>) -> Result<(), Error> {
         self.registered_request().replace_sm(replace_sm).await
+    }
+
+    /// Sends a [`SubmitMulti`] command to the server and waits for a successful [`SubmitMultiResp`].
+    pub async fn submit_multi(
+        &self,
+        submit_multi: impl Into<SubmitMulti>,
+    ) -> Result<SubmitMultiResp, Error> {
+        self.registered_request().submit_multi(submit_multi).await
     }
 
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
@@ -513,6 +521,14 @@ impl<'a> UnregisteredRequestBuilder<'a> {
         self.registered_request().replace_sm(replace_sm).await
     }
 
+    /// Sends a [`SubmitMulti`] command to the server and waits for a successful [`SubmitMultiResp`].
+    pub async fn submit_multi(
+        &self,
+        submit_multi: impl Into<SubmitMulti>,
+    ) -> Result<SubmitMultiResp, Error> {
+        self.registered_request().submit_multi(submit_multi).await
+    }
+
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
         self.registered_request().submit_sm(submit_sm).await
@@ -761,6 +777,18 @@ impl<'a> RegisteredRequestBuilder<'a> {
             .map_err(Error::unexpected_response)
     }
 
+    /// Sends a [`SubmitMulti`] command to the server and waits for a successful [`SubmitMultiResp`].
+    pub async fn submit_multi(
+        &self,
+        submit_multi: impl Into<SubmitMulti>,
+    ) -> Result<SubmitMultiResp, Error> {
+        self.request_extract(submit_multi.into(), |pdu| match pdu {
+            Pdu::SubmitMultiResp(response) => Ok(response),
+            _ => Err(pdu),
+        })
+        .await
+    }
+
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
         self.request_extract(submit_sm.into(), |pdu| match pdu {
@@ -887,6 +915,17 @@ impl<'a> NoWaitRequestBuilder<'a> {
 
         self.unregistered_request()
             .unregistered_request(replace_sm.into(), sequence_number)
+            .await?;
+
+        Ok(sequence_number)
+    }
+
+    /// Sends a [`SubmitMulti`] command to the server without waiting for the response.
+    pub async fn submit_multi(&self, submit_multi: impl Into<SubmitMulti>) -> Result<u32, Error> {
+        let sequence_number = self.client.inner.next_sequence_number();
+
+        self.unregistered_request()
+            .unregistered_request(submit_multi.into(), sequence_number)
             .await?;
 
         Ok(sequence_number)
