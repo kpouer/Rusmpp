@@ -11,7 +11,7 @@ use rusmpp::{
     command::CommandParts,
     pdus::{
         BindReceiver, BindReceiverResp, BindTransceiver, BindTransceiverResp, BindTransmitter,
-        BindTransmitterResp, DeliverSmResp, SubmitSm, SubmitSmResp,
+        BindTransmitterResp, BroadcastSm, BroadcastSmResp, DeliverSmResp, SubmitSm, SubmitSmResp,
     },
     values::InterfaceVersion,
 };
@@ -86,6 +86,14 @@ impl Client {
         bind: impl Into<BindTransceiver>,
     ) -> Result<BindTransceiverResp, Error> {
         self.registered_request().bind_transceiver(bind).await
+    }
+
+    /// Sends a [`BroadcastSm`] command to the server and waits for a successful [`BroadcastSmResp`].
+    pub async fn broadcast_sm(
+        &self,
+        broadcast_sm: impl Into<BroadcastSm>,
+    ) -> Result<BroadcastSmResp, Error> {
+        self.registered_request().broadcast_sm(broadcast_sm).await
     }
 
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
@@ -394,6 +402,14 @@ impl<'a> UnregisteredRequestBuilder<'a> {
         self.registered_request().bind_transceiver(bind).await
     }
 
+    /// Sends a [`BroadcastSm`] command to the server and waits for a successful [`BroadcastSmResp`].
+    pub async fn broadcast_sm(
+        &self,
+        broadcast_sm: impl Into<BroadcastSm>,
+    ) -> Result<BroadcastSmResp, Error> {
+        self.registered_request().broadcast_sm(broadcast_sm).await
+    }
+
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
         self.registered_request().submit_sm(submit_sm).await
@@ -570,6 +586,18 @@ impl<'a> RegisteredRequestBuilder<'a> {
         .await
     }
 
+    /// Sends a [`BroadcastSm`] command to the server and waits for a successful [`BroadcastSmResp`].
+    pub async fn broadcast_sm(
+        &self,
+        broadcast_sm: impl Into<BroadcastSm>,
+    ) -> Result<BroadcastSmResp, Error> {
+        self.request_extract(broadcast_sm.into(), |pdu| match pdu {
+            Pdu::BroadcastSmResp(response) => Ok(response),
+            _ => Err(pdu),
+        })
+        .await
+    }
+
     /// Sends a [`SubmitSm`] command to the server and waits for a successful [`SubmitSmResp`].
     pub async fn submit_sm(&self, submit_sm: impl Into<SubmitSm>) -> Result<SubmitSmResp, Error> {
         self.request_extract(submit_sm.into(), |pdu| match pdu {
@@ -616,6 +644,17 @@ impl<'a> NoWaitRequestBuilder<'a> {
     pub const fn status(mut self, status: CommandStatus) -> Self {
         self.status = status;
         self
+    }
+
+    /// Sends a [`BroadcastSm`] command to the server without waiting for the response.
+    pub async fn broadcast_sm(&self, broadcast_sm: impl Into<BroadcastSm>) -> Result<u32, Error> {
+        let sequence_number = self.client.inner.next_sequence_number();
+
+        self.unregistered_request()
+            .unregistered_request(broadcast_sm.into(), sequence_number)
+            .await?;
+
+        Ok(sequence_number)
     }
 
     /// Sends a [`SubmitSm`] command to the server without waiting for the response.
